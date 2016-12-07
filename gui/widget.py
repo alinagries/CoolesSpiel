@@ -1,3 +1,5 @@
+# -\*- coding: cp1252 -\*-
+
 import pygame.sprite
 import pygame
 import border as brd
@@ -11,13 +13,13 @@ class Widget(pygame.sprite.DirtySprite):
     
     def __init__(self, x, y, width, height):
         pygame.sprite.DirtySprite.__init__(self)
-        self.__originalImage    = pygame.Surface((width, height))
-        self.__border           = defaultBorder
-        self.image              = self.__originalImage.copy()
+        self._originalImage     = pygame.Surface((width, height))
+        self._border            = defaultBorder
+        self.image              = self._originalImage.copy()
         self.rect               = self.image.get_rect().move(x, y)
-        self.__active           = True
-        self.__foreground       = defaultForeground
-        self.__background       = defaultBackground
+        self._active            = True
+        self._foreground        = defaultForeground
+        self._background        = defaultBackground
 
     def markDirty(self):
         if not self.isDirtyForever():
@@ -36,12 +38,12 @@ class Widget(pygame.sprite.DirtySprite):
         return self.dirty == 2
 
     def setActive(self, active):
-        self.__active = bool(active)
+        self._active = bool(active)
         self.markDirty()
         return self
 
     def isActive(self):
-        return self.__active
+        return self._active
 
     def setBounds(self, width, height):
         self.rect = pygame.Rect(self.rect.x, self.rect.y, width, height)
@@ -53,34 +55,34 @@ class Widget(pygame.sprite.DirtySprite):
 
     def setBorder(self, border):
         if isinstance(border, brd.Border):
-            self.__border = border
+            self._border = border
             self.markDirty()
         return self
 
     def getBorder(self):
-        return self.__border
+        return self._border
 
     def setForeground(self, color):
-        self.__foreground = color
+        self._foreground = color
         return self
 
     def setBackground(self, color):
-        self.__background = color
+        self._background = color
         return self
 
     def getForeground(self):
-        return self.__foreground
+        return self._foreground
 
     def getBackground(self):
-        return self.__background
+        return self._background
 
     def update(self, *args):
-        self.__updateOriginalImage(*args)
-        self.image = self.__border.getBorderedImage(self.__originalImage.copy())
+        self._updateOriginalImage(*args)
+        self.image = self._border.getBorderedImage(self._originalImage.copy())
         self.rect = pygame.Rect(self.rect.x, self.rect.y,
                                 self.image.get_width(), self.image.get_height())
 
-    def __updateOriginalImage(self, *args):
-        self.__originalImage.fill(self.__background)
+    def _updateOriginalImage(self, *args):
+        self._originalImage.fill(self._background)
         if not self.isActive():
-            self.__originalImage.blend(disabeledOverlay,(0,0))
+            self._originalImage.blend(disabeledOverlay,(0,0))
