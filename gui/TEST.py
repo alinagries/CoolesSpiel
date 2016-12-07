@@ -5,6 +5,7 @@ import os, sys
 import pygame
 from pygame.locals import *
 import widget, border, entry
+import button
 
 pygame.init()
 
@@ -19,6 +20,8 @@ background.fill((255,255,255))
 def main_menu():
     w = widget.Widget(50, 50, 50, 50).setBackground((255, 0, 0, 0)).setBorder(border.Border(2, 2))
     e = entry.Entry(10, 10, 100, 25).setBackground((0, 120, 255, 0))
+    b = button.Button(100, 100, 100, 50, "click").setBackground((255,255,0,0))
+
     going = True
     while going:
         #Handle Input Events#
@@ -31,6 +34,8 @@ def main_menu():
         screen.blit(w.image, w.rect)
         e.update(event)
         screen.blit(e.image, e.rect)
+        b.update(event)
+        screen.blit(b.image, b.rect)
         pygame.display.update()
         pygame.time.wait(100)
     sys.exit()
