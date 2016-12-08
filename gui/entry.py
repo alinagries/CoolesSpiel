@@ -91,7 +91,7 @@ class Entry(textwidget.TextWidget):
                     self.moveCursor(-1)
                 else:
                     char = event.unicode.encode("ascii", "ignore")
-                    if char.isalpha():
+                    if char == " " or not char.isspace():
                         self.insert(CURSOR, char)
                         self.moveCursor(1)
             elif event.type == pygame.MOUSEBUTTONDOWN:
