@@ -21,7 +21,7 @@ background.fill((255,255,255))
 def main_menu():
     w = widget.Widget(50, 50, 50, 50).setBackground((255, 0, 0, 0)).setBorder(border.Border(2, 2))
     e = entry.Entry(10, 10, 100, 25).setBackground((0, 120, 255, 0))
-    b = button.Button(100, 100, 100, 50, "click").setBackground((255,255,0,0))
+    b = button.Button(100, 100, 100, 50, "click", func = button1).setBackground((255,255,0,0))
     group = pygame.sprite.LayeredDirty([w, e, b])
     
     going = True
@@ -37,6 +37,9 @@ def main_menu():
         pygame.time.wait(100)
     pygame.quit()
     sys.exit()
+
+def button1():
+    print("Button b clicked!")
 
 #Automatic Start#
 

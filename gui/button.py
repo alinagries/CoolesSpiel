@@ -5,28 +5,22 @@ import textwidget
 import pygame
 
 class Button(textwidget.TextWidget):
-    def __init__(self, x, y, width, height, text = "", font = textwidget.defaultFont):
+    def __init__(self, x, y, width, height, text = "", font = textwidget.defaultFont, func = None):
         textwidget.TextWidget.__init__(self, x, y, width, height, text, font)
-
-    def clicked(self):
-        print("Button was clicked") # Will be replaced with actual logic
+        self.func = func
 
     def update(self, *args):
         if len(args) > 0:
             event = args[0]
             if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse = pygame.mouse.get_pos()
-                if mouse[0] > self.rect.topleft[0]:
-                    if mouse[1] > self.rect.topleft[1]:
-                        if mouse[0] < self.rect.bottomright[0]:
-                            if mouse[1] < self.rect.bottomright[1]:
-                                self.clicked()
-
-
-
+                if self.rect.collidepoint(event.pos):
+                    self.func()
 
         textwidget.TextWidget.update(self, *args)
 
     def _updateOriginalImage(self, *args):
         textwidget.TextWidget._updateOriginalImage(self, *args)
-        self._originalImage.blit(self._font.render(str(self._text), 1, (0, 0, 0)), (0, 0))
+        center = self._originalImage.get_rect().center
+        size = self._font.size(self._text)
+        coords = (center[0]-size[0]/2, center[1]-size[1]/2)
+        self._originalImage.blit(self._font.render(str(self._text), 1, (0, 0, 0)), coords) #Unsauber, aber es funktioniert!
