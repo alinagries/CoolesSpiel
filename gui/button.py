@@ -31,8 +31,8 @@ class Button(widget.Widget):
 
 
 
-        widget.Widget.update(self, args)
+        widget.Widget.update(self, *args)
 
     def _updateOriginalImage(self, *args):
-        widget.Widget._updateOriginalImage(self, args)
+        widget.Widget._updateOriginalImage(self, *args)
         self._originalImage.blit(self.font.render(str(self.text), 1, (0, 0, 0)), (0, 0))

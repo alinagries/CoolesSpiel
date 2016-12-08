@@ -14,15 +14,16 @@ class Entry(widget.Widget):
         self.font = font
 
     def update(self, *args):
-        if len(args) > 0:
+        if len(args) > 0 and self.isFocused():
             event = args[0]
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
                 else:
                     self.text += event.unicode
-        widget.Widget.update(self, args)
+                self.markDirty()
+        widget.Widget.update(self, *args)
 
     def _updateOriginalImage(self, *args):
-        widget.Widget._updateOriginalImage(self, args)
-        self._originalImage.blit(self.font.render(str(self.text), 1,(0, 0, 0)), (0, 0))
+        widget.Widget._updateOriginalImage(self, *args)
+        self._originalImage.blit(self.font.render(str(self.text), 1, self._foreground), (0, 0))
