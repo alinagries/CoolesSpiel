@@ -1,3 +1,3 @@
-# -\*- coding: cp1252 -\*-
+# -*- coding: cp1252 -*-
 
 #nothing yet

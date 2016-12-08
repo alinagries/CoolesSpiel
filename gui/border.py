@@ -1,4 +1,4 @@
-# -\*- coding: cp1252 -\*-
+# -*- coding: cp1252 -*-
 
 import pygame
 

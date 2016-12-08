@@ -1,18 +1,12 @@
-# -\*- coding: cp1252 -\*-
+# -*- coding: cp1252 -*-
 
 from __future__ import print_function
-import widget
+import textwidget
 import pygame
-import pygame.font as fnt
 
-fnt.init()
-defaultFont = fnt.Font(None, 24)
-
-class Button(widget.Widget):
-    def __init__(self, x, y, width, height, text = "", font = defaultFont):
-        widget.Widget.__init__(self, x, y, width, height)
-        self.text = text
-        self.font = font
+class Button(textwidget.TextWidget):
+    def __init__(self, x, y, width, height, text = "", font = textwidget.defaultFont):
+        textwidget.TextWidget.__init__(self, x, y, width, height, text, font)
 
     def clicked(self):
         print("Button was clicked") # Will be replaced with actual logic
@@ -31,8 +25,8 @@ class Button(widget.Widget):
 
 
 
-        widget.Widget.update(self, *args)
+        textwidget.TextWidget.update(self, *args)
 
     def _updateOriginalImage(self, *args):
-        widget.Widget._updateOriginalImage(self, *args)
-        self._originalImage.blit(self.font.render(str(self.text), 1, (0, 0, 0)), (0, 0))
+        textwidget.TextWidget._updateOriginalImage(self, *args)
+        self._originalImage.blit(self._font.render(str(self._text), 1, (0, 0, 0)), (0, 0))

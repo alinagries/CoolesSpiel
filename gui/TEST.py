@@ -1,3 +1,4 @@
+# -*- coding: cp1252 -*-
 #Modules#
 
 import random
@@ -34,6 +35,7 @@ def main_menu():
         group.draw(screen, background)
         pygame.display.update()
         pygame.time.wait(100)
+    pygame.quit()
     sys.exit()
 
 #Automatic Start#

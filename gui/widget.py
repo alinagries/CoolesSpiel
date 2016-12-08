@@ -1,4 +1,4 @@
-# -\*- coding: cp1252 -\*-
+# -*- coding: cp1252 -*-
 
 import pygame.sprite
 import pygame
@@ -91,7 +91,7 @@ class Widget(pygame.sprite.DirtySprite):
         if len(args) > 0:
             event = args[0]
             if event.type == pygame.MOUSEBUTTONDOWN:
-                self.setFocused(self.rect.collidepoint(pygame.mouse.get_pos()))
+                self.setFocused(self.rect.collidepoint(event.pos))
         if self.isDirty():
             self._updateOriginalImage(*args)
             self.image = self._border.getBorderedImage(self._originalImage.copy())
