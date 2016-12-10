@@ -10,95 +10,228 @@ defaultBackground   = (0, 0, 0, 0)
 disabeledOverlay    = (150, 150, 150, 150)
 
 class Widget(pygame.sprite.DirtySprite):
+
+    """
+    Underlying class for interactive GUI-objects with PyGame;
+    intended for use together with pygame.sprite.LayeredDirty
+    """
     
     def __init__(self, x, y, width, height):
+        """
+        Initialisation of a Widget
+
+        parameters:     int x-coordinate of the Widget (left)
+                        int y-coordinate of the Widget (top)
+                        int width of the Widget
+                        int height of the Widget
+        return values:  -
+        """
         pygame.sprite.DirtySprite.__init__(self)
-        self._originalImage     = pygame.Surface((width, height))
+        self.image              = pygame.Surface((width, height))
+        self._bounds      = self.image.get_rect().move(x, y)
+        self.rect               = self._bounds.copy()
         self._border            = defaultBorder
-        self.image              = self._originalImage.copy()
-        self.rect               = self.image.get_rect().move(x, y)
         self._focus             = False
         self._active            = True
         self._foreground        = defaultForeground
         self._background        = defaultBackground
 
     def markDirty(self):
+        """
+        Mark the Widget as dirty and therefore to be redrawn in the next cycle
+
+        parameters:     -
+        return values:  -
+        """
         if not self.isDirtyForever():
             self.dirty = 1
 
     def markDirtyForever(self):
+        """
+        Mark the Widget as constantly dirty and therefore to be redrawn periodically
+
+        parameters:     -
+        return values:  -
+        """
         self.dirty = 2
 
     def markClean(self):
+        """
+        Mark the Widget as clean and therefore not to be redrawn in the next cycle
+
+        parameters:     -
+        return values:  -
+        """
         self.dirty = 0
 
     def isDirty(self):
+        """
+        Return if the Widget is dirty and will be redrawn in the next cycle
+
+        parameters:     -
+        return values:  boolean is the Widget dirty
+        """
         return self.dirty >= 1
 
     def isDirtyForever(self):
+        """
+        Return if the Widget is constantly dirty and will be redrawn periodically
+
+        parameters:     -
+        return values:  boolean is the Widget constantly dirty
+        """
         return self.dirty >= 2
 
     def setFocused(self, focused):
+        """
+        Set the Widget as focused
+
+        parameters:     boolean if the Widget should be focused
+        return values:  Widget Widget returned for convenience
+        """
         self._focus = bool(focused)
         self.markDirty()
         return self
 
     def isFocused(self):
+        """
+        Return if the Widget is focused
+
+        parameters:     -
+        return values:  boolean is the Widget focused
+        """
         return self._focus
 
     def setActive(self, active):
+        """
+        Set the Widget as active and therefore as interactive
+
+        parameters:     boolean if the Widget should be active
+        return values:  Widget Widget returned for convenience
+        """
         self._active = bool(active)
         self.markDirty()
         return self
 
     def isActive(self):
+        """
+        Return if the Widget is active
+
+        parameters:     -
+        return values:  boolean is the Widget active
+        """
         return self._active
 
-    def setBounds(self, width, height):
-        self.rect = pygame.Rect(self.rect.x, self.rect.y, width, height)
+    def setBounds(self, rect):
+        """
+        Set the Widget's bounds
+
+        parameters:     pygame.Rect the Rect to be set
+        return values:  Widget Widget returned for convenience
+        """
+        self._bounds = rect
         self.markDirty()
         return self
 
     def getBounds(self):
-        return self.rect
+        """
+        Return the Widget's bounds
+
+        parameters:     -
+        return values:  pygame.Rect the bounds of the Widget
+        """
+        return self._bounds
 
     def setBorder(self, border):
+        """
+        Set the Widget's border
+
+        parameters:     border.Border the Border to be set
+        return values:  Widget Widget returned for convenience
+        """
         if isinstance(border, brd.Border):
             self._border = border
             self.markDirty()
         return self
 
     def getBorder(self):
+        """
+        Return the Widget's border
+
+        parameters:     -
+        return values:  border.Border the Widget's border
+        """
         return self._border
 
     def setForeground(self, color):
+        """
+        Set the Widget's foreground-color (not used by basic implementation)
+
+        parameters:     tuple tuple of format pygame.Color representing the color to be set
+        return values:  Widget Widget returned for convenience
+        """
         self._foreground = color
         self.markDirty()
         return self
 
     def setBackground(self, color):
+        """
+        Set the Widget's background-color
+
+        parameters:     tuple a tuple of format pygame.Color representing the color to be set
+        return values:  Widget Widget returned for convenience
+        """
         self._background = color
         self.markDirty()
         return self
 
     def getForeground(self):
+        """
+        Return the Widget's foreground-color (not used by basic implementation)
+
+        parameters:     -
+        return values:  tuple of format pygame.Color representing the Widget's foreground-color
+        """
         return self._foreground
 
     def getBackground(self):
+        """
+        Return the Widget's background-color 
+
+        parameters:     -
+        return values:  tuple of format pygame.Color representing the Widget's background-color
+        """
         return self._background
 
     def update(self, *args):
-        if len(args) > 0:
+        """
+        Perform any updates on the Widget if needed;
+        basic implementation of focus, active-state and border-rendering;
+        used for interaction in more advanced, derivated Widget-classes
+
+        parameters:     tuple arguments for the update (first argument should be an instance pygame.event.Event)
+        return values:  -
+        """
+        if self.isActive() and len(args) > 0:
             event = args[0]
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.setFocused(self.rect.collidepoint(event.pos))
         if self.isDirty():
-            self._updateOriginalImage(*args)
-            self.image = self._border.getBorderedImage(self._originalImage.copy())
-            self.rect = pygame.Rect(self.rect.x, self.rect.y,
-                                self.image.get_width(), self.image.get_height())
+            self.rect   = self._border.getBounds(self._bounds)
+            self.image  = self._border.getBorderedImage(self._getAppearance(*args))
+            if not self.isActive():
+                self.image.blit(1,(0,0))
 
-    def _updateOriginalImage(self, *args):
-        self._originalImage.fill(self._background)
-        if not self.isActive():
-            self._originalImage.blend(disabeledOverlay,(0,0))
+    def _getAppearance(self, *args):
+        """
+        Return the underlying Widget's appearance;
+        basic implementation of background-coloring
+
+        private function
+
+        parameters:     tuple arguments for the update (first argument should be an instance pygame.event.Event)
+        return values:  pygame.Surface the underlying Widget's appearance
+        """
+        surface = pygame.Surface(self._bounds.size)
+        surface.fill(self._background)
+        return surface

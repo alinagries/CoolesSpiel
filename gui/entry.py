@@ -1,84 +1,95 @@
 # -*- coding: cp1252 -*-
 
+import selectiontextwidget
 import textwidget
 import pygame
+from selectiontextwidget import *
 
-START   = 0
-END     = 'e'
-CURRENT = 'c'
-INSERT  = CURRENT
-CURSOR  = CURRENT
+class Entry(selectiontextwidget.SelectionTextWidget):
 
-class Entry(textwidget.TextWidget):
-    def __init__(self, x, y, width, height, text = "", font = textwidget.defaultFont, validation = (lambda *x: True)):
-        textwidget.TextWidget.__init__(self, x, y, width, height, text, font)
+    """
+    Entry that accepts keyboard-input
+    """
+    
+    def __init__(self, x, y, width, height, text = "", font = textwidget.defaultFont, selectioncolor = selectiontextwidget.defaultSelection, validation = (lambda *x: True)):
+        """
+        Initialisation of an Entry
+
+        parameters:     int x-coordinate of the Entry (left)
+                        int y-coordinate of the Entry (top)
+                        int width of the Entry
+                        int height of the Entry
+                        string test of the Entry
+                        pygame.font.Font font of the Entry
+                        tuple of format pygame.Color representing the Entry's selection-color
+                        function function that validates input; validation(newtext, oldtext, entry) -> bool
+        return values:  -
+        """
+        selectiontextwidget.SelectionTextWidget.__init__(self, x, y, width, height, text, font, selectioncolor = selectiontextwidget.defaultSelection)
         self._validation = validation
-        self._cursor = 0
 
     def setText(self, text):
+        """
+        Set the Entry's text; needs to be valid according to the Entry's validation-function
+
+        parameters:     string the text to be set
+        return values:  Entry Entry returned for convenience
+        """
         if self._validation(text, self._text, self):
-            textwidget.TextWidget.setText(self, text)
+            selectiontextwidget.SelectionTextWidget.setText(self, text)
         return self
 
     def setValidation(self, validation):
-        if isinstance(validation, function):
+        """
+        Set the Entry's validation-function
+
+        parameters:     function function that validates input; validation(newtext, oldtext, entry) -> bool
+        return values:  Entry Entry returned for convenience
+        """
+        if callable(validation):
             self._validation = validation
         return self
 
     def getValidation(self):
+        """
+        Get the Entry's validation-function
+
+        parameters:     -
+        return values:  function the Entry's validation-function
+        """
         return self._validation
 
-    def setCursor(self, index):
-        self._cursor = self.getActualIndex(index)
-        self.markDirty()
-
-    def getCursor(self):
-        return self._cursor
-
-    def moveCursor(self, index):
-        self.setCursor(min(max(self.getActualIndex(CURSOR) + int(index), 0), len(self._text)))
-
     def insert(self, index, text):
+        """
+        Insert a given text at the given index
+
+        parameters:     int the index the text should be insterted at
+                        string the text to be insertet
+        return values:  -
+        """
         index = self.getActualIndex(index)
         self.setText(self._text[:index] + text + self._text[index:])
 
     def delete(self, startindex, endindex):
+        """
+        Deletes the Entry's text between the two given indices
+
+        parameters:     int the index from which the text should be deleted
+                        int the index till which the text should be deleted
+        return values:  -
+        """
         indices = [self.getActualIndex(startindex), self.getActualIndex(endindex)]
         indices.sort()
         startindex, endindex = indices
         self.setText(self._text[:startindex] + self._text[endindex:])
 
-    def getActualIndex(self, index):
-        if index == CURRENT:
-            return self._cursor
-        if index == END:
-            return len(self._text)
-        return abs(int(index))
-
-    def _indexToX(self, index):
-        x       = 0
-        metrics = self._font.metrics(self._text)
-        if metrics:
-            for n in range(min(int(index), len(metrics))):
-                x += metrics[n][4]
-        return x
-
-    def _xToIndex(self, x):
-        index   = 0
-        n       = 0
-        metrics = self._font.metrics(self._text)
-        if metrics:
-            for index in range(len(metrics)):
-                if n > int(x):
-                    break
-                n += metrics[index][4]
-            else:
-                index += 1
-            if n - int(x) >= metrics[max(index - 1, 0)][4] / 2:
-                index -= 1
-        return index
-
     def update(self, *args):
+        """
+        Handles the selection and keyboard-input
+
+        parameters: tuple arguments for the update (first argument should be an instance pygame.event.Event)
+        return values: -
+        """
         if len(args) > 0:
             event = args[0]
             if event.type == pygame.KEYDOWN and self.isFocused():
@@ -87,23 +98,45 @@ class Entry(textwidget.TextWidget):
                 elif event.key == pygame.K_RIGHT:
                     self.moveCursor(1)
                 elif event.key == pygame.K_BACKSPACE:
-                    self.delete(self.getActualIndex(CURSOR) - 1, CURSOR)
-                    self.moveCursor(-1)
+                    if self._selectionstart == self._cursor:
+                        self.delete(self._selectionstart - 1, CURSOR)
+                        self.moveCursor(-1)
+                    else:
+                        self.delete(SELECTION, CURSOR)
+                        self.setCursor(self._selectionstart)
                 else:
                     char = event.unicode.encode("ascii", "ignore")
                     if char == " " or not char.isspace():
-                        self.insert(CURSOR, char)
-                        self.moveCursor(1)
+                        s = self.getActualIndex(SELECTION)
+                        self.delete(s, CURSOR)
+                        self.insert(s, char)
+                        self.setCursor(s + 1)
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if self.rect.collidepoint(event.pos):
+                    self.setSelection(CURSOR, self._xToIndex(event.pos[0] - self.rect.x))
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
                     self.setCursor(self._xToIndex(event.pos[0] - self.rect.x))
-        textwidget.TextWidget.update(self, *args)
+        selectiontextwidget.SelectionTextWidget.update(self, *args)
 
-    def _updateOriginalImage(self, *args):
+    def _getAppearance(self, *args):
+        """
+        Return the underlying Widget's appearance;
+        Renders the Entry's text, cursor and selection
+
+        private function
+
+        parameters:     tuple arguments for the update (first argument should be an instance pygame.event.Event)
+        return values:  pygame.Surface the underlying Widget's appearance
+        """
+        surface = selectiontextwidget.SelectionTextWidget._getAppearance(self, *args)
         linesize = self._font.get_linesize()
-        textwidget.TextWidget._updateOriginalImage(self, *args)
-        self._originalImage.blit(self._font.render(str(self._text), 1, self._foreground), (0, (self.rect.height - linesize) / 2))
+        surface.blit(self._font.render(str(self._text), 1, self._foreground), (0, self.rect.centery - linesize))
         if self.isFocused():
             cursor = pygame.Surface((2, linesize))
             cursor.fill(self._foreground)
-            self._originalImage.blit(cursor, (self._indexToX(self._cursor), (self.rect.height - linesize) / 2))
+            surface.blit(cursor, (self._indexToX(CURSOR), self.rect.centery - linesize))
+            selection = pygame.Surface((self._indexToX(CURSOR) - self._indexToX(SELECTION), linesize), pygame.SRCALPHA, 32)
+            selection.fill(self._selectioncolor)
+            surface.blit(selection, (self._indexToX(SELECTION), self.rect.centery - linesize))
+        return surface

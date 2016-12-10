@@ -20,8 +20,8 @@ background.fill((255,255,255))
 
 def main_menu():
     w = widget.Widget(50, 50, 50, 50).setBackground((255, 0, 0, 0)).setBorder(border.Border(2, 2))
-    e = entry.Entry(10, 10, 100, 25).setBackground((0, 120, 255, 0))
-    b = button.Button(100, 100, 100, 50, "click", func = button1).setBackground((255,255,0,0))
+    e = entry.Entry(10, 10, 100, 25).setBackground((0, 120, 255, 0)).setBorder(border.Border(5, 5)).setValidation(isNumber)
+    b = button.Button(100, 100, 100, 50, "click", callback = button1).setBackground((255,255,0,0))
     group = pygame.sprite.LayeredDirty([w, e, b])
     
     going = True
@@ -40,6 +40,9 @@ def main_menu():
 
 def button1():
     print("Button b clicked!")
+
+def isNumber(newtext, oldtext, widget):
+    return not newtext or newtext.isdigit()
 
 #Automatic Start#
 

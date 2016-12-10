@@ -1,3 +1,5 @@
 # -*- coding: cp1252 -*-
 
-#nothing yet
+"""
+Package for interactive GUI-objects with PyGame
+"""
