@@ -12,7 +12,7 @@ class Button(textwidget.TextWidget):
 
     def __init__(self, x, y, width, height, text = "", font = textwidget.defaultFont, callback = None):
         """
-        Initialisation of an Button
+        Initialisation of an Entry
 
         parameters:     int x-coordinate of the Button (left)
                         int y-coordinate of the Button (top)
