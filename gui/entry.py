@@ -19,7 +19,7 @@ class Entry(selectiontextwidget.SelectionTextWidget):
                         int y-coordinate of the Entry (top)
                         int width of the Entry
                         int height of the Entry
-                        string test of the Entry
+                        string text of the Entry
                         pygame.font.Font font of the Entry
                         tuple of format pygame.Color representing the Entry's selection-color
                         function function that validates input; validation(newtext, oldtext, entry) -> bool
