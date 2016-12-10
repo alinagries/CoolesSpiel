@@ -1,5 +1,5 @@
 # -*- coding: cp1252 -*-
-#Datum :    07-09.12.16
+#Datum :    07.12.16
 #Autor/en:  Lucas V.
 #Version:   1.0
 
@@ -11,9 +11,9 @@ Ein Bullet ist eine Kugel mit einer Position, Bewegungsrichtung, Geschwindigkeit
 Ein Bullet wird immer von einer Waffe erzeugt
 '''
  
-class Bullet():
-    def __init__(self, position = (0, 0), direction = (0, 0), speed = 1, damage = 2):
-        self = super.__init__(position, direction, speed)
+class Bullet(Entity):
+    def __init__(self, rect = ((0, 0), (2, 5)), direction = (0, 0), speed = 1, damage = 2):
+        self = super.__init__(rect, direction, speed)
         self.dmg = damage
         self.__pixelLength = 10
  
@@ -33,13 +33,13 @@ class Bullet():
         y = self.position[1]
         directionX = self.direction[0]
         directionY = self.direction[1]
-        r = self.__pixelLength / math.sqrt( math.pow(directionX, 2) + math.pow(directionY, 2))
+        r = self.__pixelLength / math.hypot(directionX, directionY)
         
         newXPosition = x + r * directionX
         newYPosition = y + r * directionY
         
-        self.position[0] = newXPosition
-        self.position[1] = newYPosition
+        self.position[0] = int(newXPosition)
+        self.position[1] = int(newYPosition)
         
     def getDamge(self):
         return self.dmg
