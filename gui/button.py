@@ -11,6 +11,18 @@ class Button(textwidget.TextWidget):
     """
 
     def __init__(self, x, y, width, height, text = "", font = textwidget.defaultFont, callback = None):
+        """
+        Initialisation of an Entry
+
+        parameters:     int x-coordinate of the Button (left)
+                        int y-coordinate of the Button (top)
+                        int width of the Button
+                        int height of the Button
+                        string text of the Button
+                        pygame.font.Font font of the Button
+                        function callback function to be called when Button is pressed
+                return values:  -
+                """
         textwidget.TextWidget.__init__(self, x, y, width, height, text, font)
         self._callback = callback
 
