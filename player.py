@@ -4,7 +4,6 @@
 #Version:   1.0
 
 from entity import Entity
-from bullet import Bullet
 from weapon import Weapon
 import pygame
 '''
@@ -22,7 +21,7 @@ class Player(Entity):
     
     def shoot(self, weapon):
         position = self.rect[0]
-        bullet = weapon.createBullet(position) #bullet ist eine Kugel mit Position, Groeﬂe, Richtung, Geschwindigkeit und Schaden 
+        bullet = weapon.createBullet(position) #bullet ist eine Kugel mit Position, Groe√üe, Richtung, Geschwindigkeit und Schaden 
         return bullet #dem game muss noch gesagt werden, dass geschossen wurde
     
     def secondaryWeapon(self):
