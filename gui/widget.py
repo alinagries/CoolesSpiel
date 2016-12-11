@@ -13,6 +13,7 @@ class Widget(pygame.sprite.DirtySprite):
 
     """
     Underlying class for interactive GUI-objects with PyGame;
+    extends pygame.sprite.DirtySprite
     intended for use together with pygame.sprite.LayeredDirty
     """
     
@@ -28,7 +29,7 @@ class Widget(pygame.sprite.DirtySprite):
         """
         pygame.sprite.DirtySprite.__init__(self)
         self.image              = pygame.Surface((width, height))
-        self._bounds      = self.image.get_rect().move(x, y)
+        self._bounds            = self.image.get_rect().move(x, y)
         self.rect               = self._bounds.copy()
         self._border            = defaultBorder
         self._focus             = False
@@ -232,6 +233,6 @@ class Widget(pygame.sprite.DirtySprite):
         parameters:     tuple arguments for the update (first argument should be an instance pygame.event.Event)
         return values:  pygame.Surface the underlying Widget's appearance
         """
-        surface = pygame.Surface(self._bounds.size)
+        surface = pygame.Surface(self._bounds.size, pygame.SRCALPHA, 32)
         surface.fill(self._background)
         return surface
