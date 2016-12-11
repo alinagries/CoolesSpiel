@@ -14,6 +14,7 @@ pygame.init()
 
 screen = pygame.display.set_mode((700,400),0,32)
 pygame.mouse.set_visible(1)
+pygame.key.set_repeat(1, 50)
 
 background = pygame.Surface((700,350))
 background.fill((255,255,255))
