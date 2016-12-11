@@ -1,6 +1,7 @@
 # -*- coding: cp1252 -*-
 
 import pygame
+import pygame.draw
 
 class Border():
 
@@ -30,9 +31,10 @@ class Border():
         if isinstance(surface, pygame.Surface) and not self.isEmptyBorder():
             size        = self.getBounds(surface.get_rect())
             bordered    = pygame.Surface((size.width, size.height), 0, surface)
-            bordered.fill((0, 0, 0), size)
+            bordered.fill((0, 0, 0))
             bordered.blit(surface, (self.width, self.height))
             return bordered
+            return surface
         return surface
 
     def getBounds(self, rect):

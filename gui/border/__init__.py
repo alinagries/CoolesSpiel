@@ -4,3 +4,10 @@
 Package for Borders compatible with PyGame's Surfaces;
 intended for use together with Widget
 """
+
+import border
+Border = border.Border
+import coloredborder
+ColoredBorder = coloredborder.ColoredBorder
+import compoundborder
+CompoundBorder = compoundborder.CompoundBorder
