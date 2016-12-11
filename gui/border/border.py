@@ -1,7 +1,6 @@
 # -*- coding: cp1252 -*-
 
 import pygame
-import pygame.draw
 
 class Border():
 
