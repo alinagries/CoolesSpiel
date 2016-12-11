@@ -4,7 +4,7 @@
 import random
 import os, sys
 import pygame
-import widget, border, entry
+import widget, entry, border
 import button
 from pygame.locals import *
 
@@ -14,15 +14,15 @@ pygame.init()
 
 screen = pygame.display.set_mode((700,400),0,32)
 pygame.mouse.set_visible(1)
-pygame.key.set_repeat(1, 50)
 
 background = pygame.Surface((700,350))
 background.fill((255,255,255))
 
 def main_menu():
-    w = widget.Widget(50, 50, 50, 50).setBackground((255, 0, 0, 0)).setBorder(border.Border(2, 2))
-    e = entry.Entry(10, 10, 100, 25).setBackground((0, 120, 255, 0)).setBorder(border.Border(5, 5)).setValidation(isNumber)
-    b = button.Button(100, 100, 100, 50, "click", callback = button1).setBackground((255,255,0,0))
+    w = widget.Widget(50, 50, 50, 50).setBackground((255, 0, 0)).setBorder(border.Border(2, 2))
+    r = border.CompoundBorder(border.CompoundBorder(border.ColoredBorder(2, 2, (30, 90, 150)), border.ColoredBorder(3, 3, (130, 190, 250))), border.ColoredBorder(2, 2, (30, 90, 150)))
+    e = entry.Entry(10, 10, 100, 25).setBackground((0, 120, 255)).setBorder(r).setValidation(isNumber)
+    b = button.Button(100, 100, 100, 50, "click", callback = button1).setBackground((255,255,0))
     group = pygame.sprite.LayeredDirty([w, e, b])
     
     going = True

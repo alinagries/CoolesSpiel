@@ -2,11 +2,11 @@
 
 import pygame.sprite
 import pygame
-import border as brd
+from border import Border
 
-defaultBorder       = brd.Border(0, 0)
-defaultForeground   = (255, 255, 255, 0)
-defaultBackground   = (0, 0, 0, 0)
+defaultBorder       = Border(0, 0)
+defaultForeground   = (255, 255, 255)
+defaultBackground   = (0, 0, 0)
 disabeledOverlay    = (150, 150, 150, 150)
 
 class Widget(pygame.sprite.DirtySprite):
@@ -28,7 +28,7 @@ class Widget(pygame.sprite.DirtySprite):
         return values:  -
         """
         pygame.sprite.DirtySprite.__init__(self)
-        self.image              = pygame.Surface((width, height))
+        self.image              = pygame.Surface((width, height), pygame.SRCALPHA, 32)
         self._bounds            = self.image.get_rect().move(x, y)
         self.rect               = self._bounds.copy()
         self._border            = defaultBorder
@@ -150,7 +150,7 @@ class Widget(pygame.sprite.DirtySprite):
         parameters:     border.Border the Border to be set
         return values:  Widget Widget returned for convenience
         """
-        if isinstance(border, brd.Border):
+        if isinstance(border, Border):
             self._border = border
             self.markDirty()
         return self
@@ -221,7 +221,7 @@ class Widget(pygame.sprite.DirtySprite):
             self.rect   = self._border.getBounds(self._bounds)
             self.image  = self._border.getBorderedImage(self._getAppearance(*args))
             if not self.isActive():
-                self.image.blit(1,(0,0))
+                self.image.blit(1, (0, 0))
 
     def _getAppearance(self, *args):
         """
@@ -233,6 +233,6 @@ class Widget(pygame.sprite.DirtySprite):
         parameters:     tuple arguments for the update (first argument should be an instance pygame.event.Event)
         return values:  pygame.Surface the underlying Widget's appearance
         """
-        surface = pygame.Surface(self._bounds.size, pygame.SRCALPHA, 32)
+        surface = pygame.Surface(self._bounds.size, pygame.SRCALPHA)
         surface.fill(self._background)
         return surface
