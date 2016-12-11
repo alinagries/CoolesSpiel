@@ -13,8 +13,8 @@ class Border():
         """
         Initialisation of a Border
 
-        parameters:     int width of the TextWidget on the left and right sides
-                        int width of the TextWidget on the top and bottom sides
+        parameters:     int width of the Border on the left and right sides
+                        int height of the Border on the top and bottom sides
         return values:  -
         """
         self.width  = width
