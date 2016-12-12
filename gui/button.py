@@ -77,5 +77,5 @@ class Button(textwidget.TextWidget):
         center = surface.get_rect().center
         size = self._font.size(self._text)
         coords = (center[0] - size[0] / 2, center[1] - size[1] / 2)
-        surface.blit(self._font.render(str(self._text), 1, (0, 0, 0)), coords) # Unsauber, aber es funktioniert!
+        surface.blit(self._font.render(str(self._text), pygame.SRCALPHA, self._foreground), coords)
         return surface
