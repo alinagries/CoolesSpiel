@@ -90,7 +90,7 @@ class Entry(selectiontextwidget.SelectionTextWidget):
         parameters: tuple arguments for the update (first argument should be an instance pygame.event.Event)
         return values: -
         """
-        if len(args) > 0:
+        if len(args) > 0 and self.isActive():
             event = args[0]
             if event.type == pygame.KEYDOWN and self.isFocused():
                 if event.key == pygame.K_LEFT:
@@ -118,6 +118,7 @@ class Entry(selectiontextwidget.SelectionTextWidget):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
                     self.setCursor(self._xToIndex(event.pos[0] - self.rect.x))
+        
         selectiontextwidget.SelectionTextWidget.update(self, *args)
 
     def _getAppearance(self, *args):
@@ -132,7 +133,7 @@ class Entry(selectiontextwidget.SelectionTextWidget):
         """
         surface = selectiontextwidget.SelectionTextWidget._getAppearance(self, *args)
         linesize = self._font.get_linesize()
-        surface.blit(self._font.render(str(self._text), 1, self._foreground), (0, self.rect.centery - linesize))
+        surface.blit(self._font.render(str(self._text), pygame.SRCALPHA, self._foreground), (0, self.rect.centery - linesize))
         if self.isFocused():
             cursor = pygame.Surface((2, linesize))
             cursor.fill(self._foreground)

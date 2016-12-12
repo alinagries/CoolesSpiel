@@ -11,18 +11,6 @@ class Button(textwidget.TextWidget):
     """
 
     def __init__(self, x, y, width, height, text = "", font = textwidget.defaultFont, callback = None):
-        """
-        Initialisation of an Entry
-
-        parameters:     int x-coordinate of the Button (left)
-                        int y-coordinate of the Button (top)
-                        int width of the Button
-                        int height of the Button
-                        string text of the Button
-                        pygame.font.Font font of the Button
-                        function callback function to be called when Button is pressed
-                return values:  -
-                """
         textwidget.TextWidget.__init__(self, x, y, width, height, text, font)
         self._callback = callback
 
@@ -41,7 +29,7 @@ class Button(textwidget.TextWidget):
         parameters: tuple arguments for the update (first argument should be an instance pygame.event.Event)
         return values: -
         """
-        if len(args) > 0:
+        if len(args) > 0 and self.isActive():
             event = args[0]
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
@@ -65,5 +53,5 @@ class Button(textwidget.TextWidget):
         center = surface.get_rect().center
         size = self._font.size(self._text)
         coords = (center[0] - size[0] / 2, center[1] - size[1] / 2)
-        surface.blit(self._font.render(str(self._text), 1, (0, 0, 0)), coords) # Unsauber, aber es funktioniert!
+        surface.blit(self._font.render(str(self._text), pygame.SRCALPHA, self._foreground), coords)
         return surface
