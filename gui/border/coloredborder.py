@@ -30,7 +30,7 @@ class ColoredBorder(border.Border):
         """
         if isinstance(surface, pygame.Surface) and not self.isEmptyBorder():
             size        = self.getBounds(surface.get_rect())
-            bordered    = pygame.Surface((size.width, size.height), 0, surface)
+            bordered    = pygame.Surface(size.size, 0, surface)
             bordered.fill(self.color)
             bordered.blit(surface, (self.width, self.height))
             return bordered
