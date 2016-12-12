@@ -52,7 +52,7 @@ class Entry(selectiontextwidget.SelectionTextWidget):
 
     def getValidation(self):
         """
-        Get the Entry's validation-function
+        Return the Entry's validation-function
 
         parameters:     -
         return values:  function the Entry's validation-function

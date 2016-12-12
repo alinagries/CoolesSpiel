@@ -11,15 +11,39 @@ class Button(textwidget.TextWidget):
     """
 
     def __init__(self, x, y, width, height, text = "", font = textwidget.defaultFont, callback = None):
+        """
+        Initialisation of a Button
+
+        parameters:     int x-coordinate of the Button (left)
+                        int y-coordinate of the Button (top)
+                        int width of the Button
+                        int height of the Button
+                        string text of the Button
+                        pygame.font.Font font of the Button
+                        function callback function to be called when Button is pressed
+                return values:  -
+                """
         textwidget.TextWidget.__init__(self, x, y, width, height, text, font)
         self._callback = callback
 
-    def setValidation(self, callback):
+    def setCallback(self, callback):
+        """
+        Set the Button's callback-function
+
+        parameters:     function function that executes on click
+        return values:  Button Button returned for convenience
+        """
         if callable(callback):
             self._callback = callback
         return self
 
-    def getValidation(self):
+    def getCallback(self):
+        """
+        Return the Button's callback-function
+
+        parameters:     -
+        return values:  function the Buttons's callback-function
+        """
         return self._callback
 
     def update(self, *args):
@@ -53,5 +77,5 @@ class Button(textwidget.TextWidget):
         center = surface.get_rect().center
         size = self._font.size(self._text)
         coords = (center[0] - size[0] / 2, center[1] - size[1] / 2)
-        surface.blit(self._font.render(str(self._text), pygame.SRCALPHA, self._foreground), coords)
+        surface.blit(self._font.render(str(self._text), 1, (0, 0, 0)), coords) # Unsauber, aber es funktioniert!
         return surface
