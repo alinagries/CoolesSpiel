@@ -19,7 +19,7 @@ class Entry(selectiontextwidget.SelectionTextWidget):
                         int y-coordinate of the Entry (top)
                         int width of the Entry
                         int height of the Entry
-                        string text of the Entry
+                        string test of the Entry
                         pygame.font.Font font of the Entry
                         tuple of format pygame.Color representing the Entry's selection-color
                         function function that validates input; validation(newtext, oldtext, entry) -> bool
@@ -106,7 +106,8 @@ class Entry(selectiontextwidget.SelectionTextWidget):
                         self.setCursor(self._selectionstart)
                 else:
                     char = event.unicode.encode("ascii", "ignore")
-                    if char == " " or not char.isspace():
+                    if (char != "" and (char == " " or not char.isspace())
+                    and self._validation(self._text + char, self._text, self)):
                         s = self.getActualIndex(SELECTION)
                         self.delete(s, CURSOR)
                         self.insert(s, char)
