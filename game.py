@@ -1,24 +1,24 @@
 # -*- coding: cp1252 -*-
-#Datum :    07-15.12.16
+#Datum :    07-14.12.16
 #Autor/en:  Kerim, Till, Lucas V.
 #Version:   1.0
 
 import math
 
-
 class Game():    
     def __init__(self):
         '''
         Initialisation vom Game
-        Achtet durchgehend, welche Spieler noch leben, bewegt die Schuesse, achtet auf Kollisionen und zeigt die Spielerpositionen
+        Achtet durchgehend, welche Spieler noch leben, bewegt die Schuesse,
+        achtet auf Kollisionen und zeigt die Spielerpositionen
         Beendet das Spiel sobald nur noch ein Spieler am leben ist
         Parameter:      rect
                             int mit der distanz nach links
                             int mit der disanz nach oben
                             int width von dem Objekt
                             int heigth von dem Objekt
-                        int speed von der Bullet (Bewegungsgeschwindigkeit)
-                        int damage von der Bullet
+                        Float speed von der Bullet (Bewegungsgeschwindigkeit)
+                        Float damage von der Bullet
         return values:  -
         '''
         self.players = [] #liste mit Objekten(Players)
@@ -80,14 +80,15 @@ class Game():
         if bulletRect in self.wallCoordinates:# <-- wallcoords/Objekte werden gebraucht & abgleich mit denen, kp ob das so funktioniert
             self.activeShots.remove(bullet)
         for i in range(len(self.players)):
-            if bulletRect == players[i].getRect():#abbleich mit den Rectzeugs (pygame.rect dokumentation)
+            if bulletRect == players[i].getRect(): #abbleich mit den Rectzeugs (pygame.rect dokumentation)
                 self.playerIsHit(players[i], bullet) 
             self.playerIsHit()
             self.activeShots.remove(bullet)
     
     def playerIsHit(self, player, bullet):
         '''
-        zieht einem Spielerobjekt, das von einem Bulletobjekt getroffen wurde Hitpoints ab
+        zieht einem Spielerobjekt, das von einem Bulletobjekt getroffen wurde
+        Hitpoints ab
         Parameter:      Spielerobjekt, getroffener Spieler
                         Bulletobjekt, Bullet, die den Spieler getroffen hat
         return values:  -
