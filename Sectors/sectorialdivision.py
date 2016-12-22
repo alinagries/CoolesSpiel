@@ -7,6 +7,7 @@ import math
 from sector import Sector
 
 class SectorialDivision():
+    
     def __init__(self, playgroundsize = (350, 450)):
         '''
         Initialisation von SectorialDivision
@@ -63,11 +64,11 @@ class SectorialDivision():
                         zur groessenbestimmung der Sektoren
         return values:  -
         '''
-        height = playgroundsize[0] / (float(amount) / 4)
-        width = playgroundsize[1] / (float(amount) / 4)
+        height = playgroundsize[0] / float(amount / 2)
+        width = playgroundsize[1] / float(amount / 2)
         self.sectorHeight = height
         self.sectorWidth = width
-        self.sectorsize = self.sectorHeight, self.sectorWidth       
+        self.sectorsize = self.sectorHeight, self.sectorWidth
     
     def __setSectorPositions(self, amount):
         '''
@@ -96,5 +97,4 @@ class SectorialDivision():
         for i in range(len(positions)):
             sector = Sector((positions[i][0], positions[i][1], self.sectorWidth, self.sectorHeight))
             self.sectors.append(sector)
-
             
