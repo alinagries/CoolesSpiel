@@ -95,7 +95,7 @@ class Bullet(pygame.sprite.Sprite):
         '''
         Gleicht den Vektor an, sodass die Kugel nicht schneller wird, wenn sie weiter vom Spieler entfernt ist.
         Paramter : -
-        Rückgabewerte: (x,y) (angepasster Vektor)
+        RÃ¼ckgabewerte: (x,y) (angepasster Vektor)
         '''
         #muss n mal aufgerugen werden, soll, wenn es gegen eine Wand, hinderniss etc. fliegt
         length = self.vectorlength
@@ -112,7 +112,7 @@ class Bullet(pygame.sprite.Sprite):
         '''
         Bewegt die Kugel, benutzt dabei den Vektor, der mit adjustVektor angepasst wurde.
         Paramter : -
-        Rückgabewerte: -
+        RÃ¼ckgabewerte: -
         '''
         newVec = self.adjustVector()
         self.rect.y += newVec[1]
