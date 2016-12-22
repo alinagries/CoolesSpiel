@@ -1,5 +1,5 @@
 # -*- coding: cp1252 -*-
-#Datum :    07-14.12.16
+#Datum :    07-22.12.16
 #Autor/en:  Alina, Lucas V.
 #Version:   1.0
 
@@ -28,6 +28,8 @@ class Player(Entity):
         self.nick = nick
         self.hp = hitPoints
         self.weapon = self.secondaryWeapon()
+        
+        self.amors = []
     
     def shoot(self):
         '''
@@ -54,15 +56,66 @@ class Player(Entity):
         return values:  -
         '''
         self.weapon = Weapon()
-        
-    def equipWeapon(self, weapon):
+    
+    def addTrap(self, trap):
         '''
-        Der Spieler bekommt ein Waffenobjekt
-        Parameter:      Objekt aus einer Waffenklasse
+        fuegt ein trapobjekt der trapliste hinzu
+        Parameter:      Trapobjekt
         return values:  -
         '''
-        self.weapon = weapon()
-
+        self.traps.append(trap)
+        
+    def removeTrap(self, trap):
+        '''
+        nimmt einen trap aus der trapliste heraus
+        Parameter:      trap objekt
+        return values:  -
+        '''
+        self.traps.remove(trap)
+        
+    def useTrap(self, trap):
+        '''
+        nimmt einen trap aus der trapliste heraus und platziert sie auf der map
+        Parameter:      trap objekt
+        return values:  -
+        '''
+        trap.place(self.getPosition())
+        self.traps.remove(trap)
+        #muss noch im game plaziert werden
+        
+    def addAmor(self, armor):
+        '''
+        hinzufuegen einer ruestung an die Ruestungsliste
+        Parameter:      Ruestungsobjekt
+        return values:  -
+        '''
+        self.amors.append(armor)
+        
+    def removeArmor(self, armor):
+        '''
+        entfernen einer Ruestung aus der Ruestungsliste
+        Parameter:      Ruestungsobjekt
+        return values:  -
+        '''
+        self.armors.remove(armor)
+    
+    def isHit(self, damage):
+        '''
+        errechnung der Spielerhitpoints nach einem treffer
+        Parameter:      Float, damage gegen den Spieler
+        return values:  -
+        '''
+        resistance = 0
+        for armor in self.armors:
+            resistance += armor.getResistance()
+            armor.use()
+            if armor.durability == 0:
+                self.removeArmor(armor)
+        remainingDamage = damage - resistance
+        if remainingDamage > 0:
+            self.hp -= remainingDamage
+            
+            
 ##################### Getters und Setters, die momentan nirgends gebraucht werden, aber dazu gehoeren #####################
 
     def getNick(self):
