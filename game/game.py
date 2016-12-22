@@ -3,6 +3,7 @@
 #Autor/en:  Kerim, Till, Lucas V.
 #Version:   1.0
 
+#import gamemap
 import math
 
 class Game():    
@@ -21,39 +22,88 @@ class Game():
                         Float damage von der Bullet
         return values:  -
         '''
+
         self.players = [] #liste mit Objekten(Players)
         self.activeShots = [] #liste aus objekten(shots)
+        self.traps = []
 
-        while 1:
-            self.updateAllPlayers()
-            self.updateAllShots()
-            if len(players) == 1:
-                self.endGame()
-     
-    def updateAllPlayers(self):
+        while len(players) > 1:
+            self.__updateAllPlayers()
+            self.__updateAllShots()
+            self.__updateAllTraps()
+        self.__endGame()
+            
+    def __updateAllPlayers(self):
         '''
+        Private Funktion - nicht ausserhalb der Klasse benutzen!
         updatet die Spielerpositionen
         Parameter:      -
         return values:  -
         '''
         for player in self.players:
             if player.hitpoints > 0:
-                self.getPlayerPosition(player)
+                self.__getPlayerPosition(player)
                 
-                
-    def updateAllShots(self):
+    def __updateAllShots(self):
         '''
-        updatet die Bullets
+        Private Funktion - nicht ausserhalb der Klasse benutzen!
+        updatet die Positionen der Bullets und bearbeitet Kollisionen
         Parameter:      -
         return values:  -
         '''
         for bullet in self.aktiveShots:
             bullet.move()
             self.__handleCollision(bullet)
-            
-            
-    def getPlayerPosition(self, player):
+        
+    def __updateAllTraps(self):
         '''
+        Private Funktion - nicht ausserhalb der Klasse benutzen!
+        ueberprueft ob ein Spieler auf einr trap steht -> auloesung des trap
+        Parameter:      -
+        return values:  -
+        '''
+        for trap in self.traps:
+            self.__handleTrap(trap)
+            
+    def __handleCollision(self, bullet):
+        '''
+        Private Funktion - nicht ausserhalb der Klasse benutzen!
+        ueberprueft ob ein Bulletobjekt in einem Mapobjekt oder einem Spieler, zieht einem Spieler Hitpoints ab
+        und entfernt die Bullet bei einer Kollision
+        Parameter:      Bulletobjekt
+        return values:  -
+        '''
+        bulletRect = bullet.getRect() # <-- Position mit umfang!
+        if bulletRect in self.wallCoordinates:# <-- wallcoords/Objekte werden gebraucht & abgleich mit denen, kp ob das so funktioniert
+            self.activeShots.remove(bullet)
+        for player in self.players:
+            if bulletRect == player.getRect(): #abbleich mit den Rectzeugs (pygame.rect dokumentation)
+                player.isHit(bullet.getDamage()) 
+                self.activeShots.remove(bullet)
+            
+    def __handleTrap(self, trap):
+        '''
+        Private Funktion - nicht ausserhalb der Klasse benutzen!
+        ueberprueft ob ein Trapobjekt bei einem Spieler steht, loest die Trap ggf. aus und richted
+        im radius schaden an, Trap wird dann entfernt
+        Parameter:      Trapobjekt
+        return values:  -
+        '''
+        if trap.exploded():
+            explotionPositions = trap.getExplotionPositions()
+            for player in self.players:
+                if player.getRect() in explotionPositions():#ich bezweifel, dass das mit getRect funktionieren wird...
+                    player.isHit(trap.getDamage())
+            self.removeTrap(trap)
+        elif trap.activated():
+            triggerPositions = trap.getTriggerPositions()
+            for player in self.players:
+                if player.getRect() in triggerPositions:#ich bezweifel, dass das mit getRect funktionieren wird...
+                    trap.trigger()        
+            
+    def __getPlayerPosition(self, player):
+        '''
+        Private Funktion - nicht ausserhalb der Klasse benutzen!
         gibt die Position eines Spielers
         Parameter:      Spielerobjekt
         return values:  Tuple (int, int), position eines Spielers
@@ -67,34 +117,22 @@ class Game():
         return values:  -
         '''
         self.activeShots.append(bullet)
-            
-    def __handleCollision(self, bullet):
+        
+    def addTrap(self, trap):
         '''
-        Private Funktion - nicht ausserhalb der Klasse benutzen!
-        ueberprueft ob ein Bulletobjekt in einem Mapobjekt oder einem Spieler, zieht einem Spieler Hitpoints ab
-        und entfernt die Bullet bei einer Kollision
-        Parameter:      Bulletobjekt
+        fuegt einen trap der Trapliste hinzu
+        Parameter:      Spielerobjekt
         return values:  -
         '''
-        bulletRect = bullet.getRect() # <-- Position mit umfang!
-        if bulletRect in self.wallCoordinates:# <-- wallcoords/Objekte werden gebraucht & abgleich mit denen, kp ob das so funktioniert
-            self.activeShots.remove(bullet)
-        for i in range(len(self.players)):
-            if bulletRect == players[i].getRect(): #abbleich mit den Rectzeugs (pygame.rect dokumentation)
-                self.playerIsHit(players[i], bullet) 
-            self.playerIsHit()
-            self.activeShots.remove(bullet)
-    
-    def playerIsHit(self, player, bullet):
+        self.traps.append(trap)
+        
+    def removeTrap(self, trap):
         '''
-        zieht einem Spielerobjekt, das von einem Bulletobjekt getroffen wurde
-        Hitpoints ab
-        Parameter:      Spielerobjekt, getroffener Spieler
-                        Bulletobjekt, Bullet, die den Spieler getroffen hat
+        nimmt einen trap aus der trapliste heraus
+        Parameter:      trap objekt
         return values:  -
         '''
-        newHp = player.getHitpoints() - bullet.getDamge()
-        player.setHitpoints(newHp)
+        self.traps.remove(trap)
     
     def addPlayer(self, player):
         '''
@@ -112,8 +150,9 @@ class Game():
         '''
         self.players.remove(player)
 
-    def endGame(self):
+    def __endGame(self):
         '''
+        Private Funktion - nicht ausserhalb der Klasse benutzen!
         Spielende, nur noch ein Spieler lebt
         Punkteverteilung sollte hier kommen
         Parameter:      -
