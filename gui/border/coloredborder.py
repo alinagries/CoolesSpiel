@@ -13,8 +13,8 @@ class ColoredBorder(border.Border):
         """
         Initialisation of a ColoredBorder
 
-        parameters:     int width of the ColoredBorder on the left and right sides
-                        int height of the ColoredBorder on the top and bottom sides
+        parameters:     int width of the ColoredBorder on the left and right sides or tuple for each side specifically
+                        int height of the ColoredBorder on the top and bottom sides or tuple for each side specifically
                         tuple of format pygame.Color representing the ColoredBorder's color
         return values:  -
         """
@@ -29,9 +29,11 @@ class ColoredBorder(border.Border):
         return values:  pygame.Surface the bordered result
         """
         if isinstance(surface, pygame.Surface) and not self.isEmptyBorder():
-            size        = self.getBounds(surface.get_rect())
-            bordered    = pygame.Surface(size.size, 0, surface)
+            rect            = surface.get_rect()
+            size            = self.getBounds(rect)
+            bordered        = pygame.Surface(size.size, 0, surface)
             bordered.fill(self.color)
-            bordered.blit(surface, (self.width, self.height))
+            bordered.fill((0, 0, 0, 0), rect.move(self.left, self.top))
+            bordered.blit(surface, (self.left, self.top))
             return bordered
         return surface

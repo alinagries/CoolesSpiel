@@ -13,12 +13,22 @@ class Border():
         """
         Initialisation of a Border
 
-        parameters:     int width of the Border on the left and right sides
-                        int height of the Border on the top and bottom sides
+        parameters:     int width of the Border on the left and right sides or tuple for each side specifically
+                        int height of the Border on the top and bottom sides or tuple for each side specifically
         return values:  -
         """
-        self.width  = width
-        self.height = height
+        if isinstance(width, tuple):
+            self.left   = width[0]
+            self.width  = width[1]
+        else:
+            self.left   = width
+            self.width  = width
+        if isinstance(height, tuple):
+            self.top    = height[0]
+            self.height = height[1]
+        else:
+            self.top    = height
+            self.height = height
 
     def getBorderedImage(self, surface):
         """
@@ -28,10 +38,12 @@ class Border():
         return values:  pygame.Surface the bordered result
         """
         if isinstance(surface, pygame.Surface) and not self.isEmptyBorder():
-            size        = self.getBounds(surface.get_rect())
-            bordered    = pygame.Surface(size.size, 0, surface)
+            rect            = surface.get_rect()
+            size            = self.getBounds(rect)
+            bordered        = pygame.Surface(size.size, 0, surface)
             bordered.fill((0, 0, 0))
-            bordered.blit(surface, (self.width, self.height))
+            bordered.fill((0, 0, 0, 0), rect.move(self.left, self.top))
+            bordered.blit(surface, (self.left, self.top))
             return bordered
         return surface
 
@@ -43,7 +55,10 @@ class Border():
         return values:  pygame.Rect the adjusted bounds
         """
         if isinstance(rect, pygame.Rect):
-            return rect.inflate(self.width * 2, self.height * 2)
+            bordered = rect.inflate(self.width + self.left, self.height + self.top)
+            bordered.top = rect.top - self.top
+            bordered.left = rect.left - self.left
+            return bordered
         return rect
 
     def isEmptyBorder(self):
@@ -53,4 +68,4 @@ class Border():
         parameters:     -
         return values:  boolean is the Border empty
         """
-        return (self.width + self.height) == 0
+        return (self.left + self.top + self.width + self.height) == 0

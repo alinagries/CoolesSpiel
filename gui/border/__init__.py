@@ -13,3 +13,5 @@ import compoundborder
 CompoundBorder = compoundborder.CompoundBorder
 import bevelborder
 BevelBorder = bevelborder.BevelBorder
+import roundedborder
+RoundedBorder = roundedborder.RoundedBorder

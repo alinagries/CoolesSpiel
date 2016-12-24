@@ -17,8 +17,8 @@ class CompoundBorder(border.Border):
                         border.Border the Border representing the outer part of the CompoundBorder
         return values:  -
         """
-        border.Border.__init__(self, inner.width + outer.width,
-                               inner.height + outer.height)
+        border.Border.__init__(self, (inner.left + outer.left, inner.width + outer.width),
+                               (inner.top + outer.top, inner.height + outer.height))
         self.inner = inner
         self.outer = outer
 

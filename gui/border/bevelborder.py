@@ -13,10 +13,10 @@ class BevelBorder(border.Border):
         """
         Initialisation of a BevelBorder
 
-        parameters:     int width of the BevelBorder on the left and right sides
-                        int height of the BevelBorder on the top and bottom sides
+        parameters:     int width of the BevelBorder on the left and right sides or tuple for each side specifically
+                        int height of the BevelBorder on the top and bottom sides or tuple for each side specifically
                         tuple of format pygame.Color representing the BevelBorder's upper color
-                        tuple of format pygame.Color representing the ColoredBorder's lower color
+                        tuple of format pygame.Color representing the BevelBorder's lower color
         return values:  -
         """
         border.Border.__init__(self, width, height)
@@ -25,18 +25,18 @@ class BevelBorder(border.Border):
 
     def getBorderedImage(self, surface):
         """
-        Draw the ColoredBorder and return the bordered result
+        Draw the BevelBorder and return the bordered result
 
         parameters:     pygame.Surface the image to be bordered
         return values:  pygame.Surface the bordered result
         """
         if isinstance(surface, pygame.Surface) and not self.isEmptyBorder():
-            size        = self.getBounds(surface.get_rect())
-            upperhalf   = pygame.Surface(size.size, 0, surface)
-            lowerhalf   = pygame.Surface(size.inflate(-self.width, -self.height).size, 0, surface)
-            upperhalf.fill(self.upper)
-            lowerhalf.fill(self.lower)
-            upperhalf.blit(lowerhalf, (self.width, self.height))
-            upperhalf.blit(surface, (self.width, self.height))
-            return upperhalf
+            rect            = surface.get_rect()
+            size            = self.getBounds(rect)
+            bordered        = pygame.Surface(size.size, 0, surface)
+            bordered.fill(self.upper)
+            bordered.fill(self.lower, size.move(self.width + self.left, self.height + self.top))
+            bordered.fill((0, 0, 0, 0), rect.move(self.left, self.top))
+            bordered.blit(surface, (self.left, self.top))
+            return bordered
         return surface
