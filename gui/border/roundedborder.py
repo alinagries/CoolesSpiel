@@ -34,7 +34,7 @@ class RoundedBorder(coloredborder.ColoredBorder):
             size            = self.getBounds(rect)
             bordered        = pygame.Surface(size.size, 0, surface)
             bordered.blit(self._getRoundRect(size, self.color), size)
-            bordered.blit(self._getRoundRect(rect, (0, 0, 0, 0)), (self.left, self.top), special_flags = pygame.BLEND_RGBA_MIN)
+            bordered.blit(self._getRoundRect(rect, (255, 255, 255, 255)), (self.left, self.top), special_flags = pygame.BLEND_RGBA_SUB)
             bordered.blit(surface, (self.left, self.top))
             return bordered
         return surface
