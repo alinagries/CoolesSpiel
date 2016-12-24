@@ -90,8 +90,9 @@ class Widget(pygame.sprite.DirtySprite):
         parameters:     boolean if the Widget should be focused
         return values:  Widget Widget returned for convenience
         """
-        self._focus = bool(focused)
-        self.markDirty()
+        if self._focus != bool(focused):
+            self._focus = bool(focused)
+            self.markDirty()
         return self
 
     def isFocused(self):

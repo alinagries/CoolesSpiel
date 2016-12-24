@@ -121,7 +121,7 @@ class SelectionTextWidget(textwidget.TextWidget):
             return self._selectionstart
         return abs(int(index))
 
-    def _indexToX(self, index):
+    def _indexToPos(self, index):
         """
         Return the relative x-coordinate corresponding to the given index
 
@@ -132,7 +132,7 @@ class SelectionTextWidget(textwidget.TextWidget):
         """
         return self._font.size(self._text[:self.getActualIndex(index)])[0]
 
-    def _xToIndex(self, x):
+    def _posToIndex(self, x):
         """
         Return the index corresponding to the given relative x-coordinate
         

@@ -20,7 +20,7 @@ background = pygame.Surface((700,350))
 background.fill((255,255,255))
 
 def main_menu():
-    w = widget.Widget(50, 50, 50, 50).setBackground((255, 0, 0)).setBorder(border.Border(2, 2))
+    w = widget.Widget(50, 50, 50, 50).setBackground((255, 0, 0, 50)).setBorder(border.RoundedBorder((10, 80), (5, 10), (0, 0, 0), 8))
     r = border.CompoundBorder(border.CompoundBorder(border.BevelBorder(2, 2, (30, 90, 150), (30, 190, 50)), border.ColoredBorder(3, 3, (130, 190, 250, 200))), border.ColoredBorder(2, 2, (30, 90, 150, 100)))
     e = entry.Entry(10, 10, 100, 25).setBackground((0, 120, 255)).setBorder(r).setValidation(isNumber)
     b = button.Button(100, 100, 100, 50, "click", callback = button1).setBackground((255, 255, 0)).setForeground((0, 0, 0))

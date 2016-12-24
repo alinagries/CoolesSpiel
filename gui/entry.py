@@ -114,10 +114,10 @@ class Entry(selectiontextwidget.SelectionTextWidget):
                         self.setCursor(s + 1)
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.rect.collidepoint(event.pos):
-                    self.setSelection(CURSOR, self._xToIndex(event.pos[0] - self.rect.x))
+                    self.setSelection(CURSOR, self._posToIndex(event.pos[0] - self.rect.x))
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
-                    self.setCursor(self._xToIndex(event.pos[0] - self.rect.x))
+                    self.setCursor(self._posToIndex(event.pos[0] - self.rect.x))
         
         selectiontextwidget.SelectionTextWidget.update(self, *args)
 
@@ -137,8 +137,8 @@ class Entry(selectiontextwidget.SelectionTextWidget):
         if self.isFocused():
             cursor = pygame.Surface((2, linesize))
             cursor.fill(self._foreground)
-            surface.blit(cursor, (self._indexToX(CURSOR), self.rect.centery - linesize))
-            selection = pygame.Surface((self._indexToX(CURSOR) - self._indexToX(SELECTION), linesize), pygame.SRCALPHA, 32)
+            surface.blit(cursor, (self._indexToPos(CURSOR), self.rect.centery - linesize))
+            selection = pygame.Surface((self._indexToPos(CURSOR) - self._indexToPos(SELECTION), linesize), pygame.SRCALPHA, 32)
             selection.fill(self._selectioncolor)
-            surface.blit(selection, (self._indexToX(SELECTION), self.rect.centery - linesize))
+            surface.blit(selection, (self._indexToPos(SELECTION), self.rect.centery - linesize))
         return surface

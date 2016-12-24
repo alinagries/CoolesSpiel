@@ -3,6 +3,8 @@
 import textwidget
 import pygame
 
+defaultHovered    = (200, 200, 150, 50)
+defaultPressed    = (200, 200, 150, 100)
 
 class Button(textwidget.TextWidget):
 
@@ -24,7 +26,50 @@ class Button(textwidget.TextWidget):
                 return values:  -
                 """
         textwidget.TextWidget.__init__(self, x, y, width, height, text, font)
-        self._callback = callback
+        self._callback      = callback
+        self._state         = 0
+        self._hoveredcolor  = defaultHovered
+        self._pressedcolor  = defaultPressed
+
+    def setHoveredColor(self, color):
+        """
+        Set the Buttons's color overlay when hovered over
+
+        parameters:     tuple a tuple of format pygame.Color representing the color to be set
+        return values:  Widget Widget returned for convenience
+        """
+        self._hoveredcolor = color
+        self.markDirty()
+        return self
+
+    def getHoveredColor(self):
+        """
+        Return the Buttons's color overlay when hovered over
+
+        parameters:     -
+        return values:  tuple of format pygame.Color representing the Buttons's color overlay when hovered over
+        """
+        return self._hoveredcolor
+
+    def setPressedColor(self, color):
+        """
+        Set the Buttons's color overlay when pressed
+
+        parameters:     tuple a tuple of format pygame.Color representing the color to be set
+        return values:  Widget Widget returned for convenience
+        """
+        self._pressedcolor = color
+        self.markDirty()
+        return self
+
+    def getPressedColor(self):
+        """
+        Return the Buttons's color overlay when pressed
+
+        parameters:     -
+        return values:  tuple of format pygame.Color representing the Buttons's color overlay when pressed
+        """
+        return self._pressedcolor
 
     def setCallback(self, callback):
         """
@@ -46,6 +91,24 @@ class Button(textwidget.TextWidget):
         """
         return self._callback
 
+    def isHovered(self):
+        """
+        Return if the Button is hovered over
+
+        parameters:     -
+        return values:  boolean is the Button hovered over
+        """
+        return self._state == 1
+
+    def isPressed(self):
+        """
+        Return if the Button is pressed
+
+        parameters:     -
+        return values:  boolean is the Button pressed
+        """
+        return self._state >= 2
+
     def update(self, *args):
         """
         Handles the clicking of the Button and calls the function given in the constructor.
@@ -53,14 +116,26 @@ class Button(textwidget.TextWidget):
         parameters: tuple arguments for the update (first argument should be an instance pygame.event.Event)
         return values: -
         """
+        if self._state:
+            if self._state >= 2:
+                self._state = 1
+            else:
+                self._state = 0
+            self.markDirty()
         if len(args) > 0 and self.isActive():
             event = args[0]
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
+                    self._state = 2
+                    self.markDirty()
                     try:
                         self._callback()
                     except:
                         pass
+            elif event.type == pygame.MOUSEMOTION:
+                if self.rect.collidepoint(event.pos):
+                    self._state = 1
+                    self.markDirty()
 
         textwidget.TextWidget.update(self, *args)
 
@@ -78,4 +153,11 @@ class Button(textwidget.TextWidget):
         size = self._font.size(self._text)
         coords = (center[0] - size[0] / 2, center[1] - size[1] / 2)
         surface.blit(self._font.render(str(self._text), pygame.SRCALPHA, self._foreground), coords)
+        if self._state:
+            overlay = surface.copy()
+            if self._state >= 2:
+                overlay.fill(self._pressedcolor)
+            else:
+                overlay.fill(self._hoveredcolor)
+            surface.blit(overlay, (0, 0))
         return surface
