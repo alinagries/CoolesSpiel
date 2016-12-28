@@ -1,43 +1,52 @@
+# -*- coding: cp1252 -*-
+#Datum :    22/23.12.16
+#Autor/en:  Lucas V.
+#Version:   1.0
+
+from screen import Screen
 import pygame
 import random
 import math
 
 #Ein Struktur entnommen aus: http://programarcadegames.com/python_examples/show_file.php?file=bullets.py
-from player1and2 import Player1
-from player1and2 import Player2
+from player import Player
+from bot import Bot
+from bullet import Bullet
 
-
-'''Ein paar Farben'''
-BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
 
 '''erstelle das Fenster'''
 pygame.init()
-screen_width = 700
-screen_height = 400
-screen = pygame.display.set_mode([screen_width, screen_height])
+screensize = Screen().screensize
+screenWidth = screensize[0]
+screenHeight = screensize[1]
+screen = pygame.display.set_mode([screenWidth, screenHeight])
  
 '''Bullet & Sprite Listen'''
+allPlayers = pygame.sprite.Group()
 allSprites = pygame.sprite.Group()
 allBullets = pygame.sprite.Group()
- 
+
 '''erstellt 2 Spieler'''
-player1 = Player1()
-allSprites.add(player)
-player2 = Player2()
-allSprites.add(player2)
- 
- 
+player1 = Player()
+allPlayers.add(player1)
+allSprites.add(player1)
+bot = Bot()
+allPlayers.add(bot)
+allSprites.add(bot)
+
 clock = pygame.time.Clock()
 
 score = 0
-player.rect.y = 370
+player1.rect.y = 370
  
 # -------- Main Program Loop -----------
 '''Schleife, bis das Fenster geschlossen wird'''
+
+margin = 20
+#margin = pixel, die eine Kugel ueber den Spielfeldrand fliegen kann
 done = False
+print 'Bugs bei einer Bulletspeed < 0,2'
 while not done:
     # --- Event Processing
     for event in pygame.event.get():
@@ -45,59 +54,47 @@ while not done:
             done = True
         elif event.type == pygame.KEYDOWN:
             player1.update()
-            player2.update()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # Fire a bullet if the user clicks the left mouse button
-            bullet1 = Bullet()
-            bullet2 = Bullet()
-            #neu
-            
-            eventPosition = event.pos 
-            bullet1XPosition = player1.rect.centerx
-            bullet1YPosition = player1.rect.centery
-            bullet2XPosition = player2.rect.centerx
-            bullet2YPosition = player2.rect.centery
-            speed = 0.1
-            vector = ((eventPosition[0]- bullet1XPosition)*speed , (eventPosition[1] - bullet1YPosition)*speed)
-            bullet1.updateVector(vector)
-            vector2 = ((eventPosition[0]- bullet2XPosition)*speed , (eventPosition[1]- bullet2YPosition)*speed)
-            bullet2.updateVector(vector2)
-            
-            # Set the bullet so it is where the player is
-            bullet1.rect.x = player1.rect.x
-            bullet1.rect.y = player1.rect.y
-            bullet2.rect.x = player2.rect.x
-            bullet2.rect.y = player2.rect.y
-            
-            # Add the bullet to the lists
-            allSprites.add(bullet1)
-            allBullets.add(bullet1)
-            allSprites.add(bullet2)
-            allBullets.add(bullet2)
 
-        '''das laueft nur waehrend events, is bloed gemacht! muss ueberarbeitet werden!'''
-        if player.rect.colliderect(player2.rect):
-            print "1 hit 2"
-            player.rect.move(10, 10)
-        if player2.rect.colliderect(player.rect):
-            print "2 hit 1"
-            player2.rect.move(50, 50)
-             
+            bullet = player1.shoot(player1.rect.centerx, player1.rect.centery, event.pos)
+            if not bullet == None:
+                allSprites.add(bullet)
+                allBullets.add(bullet)
+            
     # --- Game logic
  
-    # Call the update() method on all the sprites
+    '''updatet positionen der Sprites und zeichnet diese neu'''
     allSprites.update()
- 
-    # Clear the screen
+
+    removeBullets = []
+    removePlayers = []
+    for bullet in allBullets:
+        if bullet.rect[0] > screenWidth + margin or bullet.rect[1] > screenHeight + margin:
+            removeBullets.append(bullet)
+        elif bullet.rect[0] < -margin or bullet.rect[1] < -margin:
+            removeBullets.append(bullet)
+        for player in allPlayers:
+            if bullet.rect.colliderect(player.rect) and player.nick != bullet.playernick:
+                removeBullets.append(bullet)
+                player.isHit(bullet.damage)
+                if player.hp < 0:
+                    removePlayers.append(player)
+
+    for bullet in removeBullets:
+        allBullets.remove(bullet)
+        allSprites.remove(bullet)
+    for player in removePlayers:
+        allPlayers.remove(player)
+        allSprites.remove(player)
+    
     screen.fill(WHITE)
- 
-    # Draw all the spites
     allSprites.draw(screen)
- 
-    # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
  
     # --- Limit to 20 frames per second
     clock.tick(60)
+
+    
  
 pygame.quit()
