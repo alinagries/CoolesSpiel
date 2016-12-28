@@ -9,16 +9,17 @@ import time
 
  
 class Weapon():
-    def __init__(self, firerate = 1, bulletspeed = 1, damage = 2, ammo = Decimal("Infinity")):
+    def __init__(self, firerate = 0.2, bulletspeed = 1, damage = 2, ammo = Decimal("Infinity")):
         '''
         Initialisation von Weapon
         Parameter:      Float firerate, schuss nach seckunde * Firerate erlaubt
-                        Float bulletspeed, Schussgeschwindigkeit (1 = Standart)
+                        Float bulletspeed, Schussgeschwindigkeit (1 = Standart) (und leider auch Praezision)
+                            ab bulletspeed < 0.2 gibt es vermehrt Bugs, teilweise auch bei > 0.2
                         Float damage, Anzahl des Schadens einer Bullet
                         int/Decimal("Infinity") ammo, Munition der Waffe
         return values:  -
         '''
-        self.bulletsize = (1, 2)
+        
         self.firerate = firerate
         self.bulletspeed = bulletspeed
         self.dmg = damage
@@ -26,17 +27,18 @@ class Weapon():
         self.lastShotTime = -self.firerate
 
 
-    def createBullet(self, position):
+    def createBullet(self, position, eventPos, playernick):#eventPos = Zielposition
         '''
         Falls eine Kugel geschossen werden darf (einzige Grund warum das nicht
         gehen sollte, ist seobald die Schussgeschwindigkeit ueberschritten wird)
         dann wird die ammo um 1 verringert und eine Bullet erzeugt
         Parameter:      Tuple (int, int) position, der neuen Bullet
+                        Tuples (int, int) Zielposition der neuen Bullet
         return values:  Bullet oder None (nur wenn schuss nicht erlaubt)
         '''
         if self.shotAllowed():
             self.ammo -= 1
-            bullet = Bullet((position[0], position[1], self.bulletsize[0], self.bulletsize[1]), (1, 1), self.bulletspeed, self.dmg)
+            bullet = Bullet(position[0], position[1], eventPos, self.bulletspeed, self.dmg, playernick)
             return bullet
         else: #steht nur fuer Tests hier
             print 'shot not Allowed'
