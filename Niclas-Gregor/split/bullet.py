@@ -6,23 +6,37 @@ import pygame
 import math
 
 BLACK = (0, 0, 0)
-screen_width = 700
-screen_height = 400
-screen = pygame.display.set_mode([screen_width, screen_height])
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, xPosition, yPosition, eventPosition, speed = 1, damage = 2, playernick = 'someone'):
         """
         Initialisierung der Klasse Bullet
-        Parameter:      -
+        Parameter:      int xPosition, die xPosition der Bullet
+                        int yPosition, die yPosition der Bullet
+                        Tuple (int, int), dei Zielposition der Bullet
+                        float speed, die geschwindigkeit der Bullet (leider auch praezision)
+                            wenn speed < 0.2 gibt es Bugs
+                        float damage, der Schaden der Bullet
         return value:   -
-        """ 
-        super(Bullet,self).__init__()# Call the parent class (Sprite) constructor
+        """
+        super(Bullet, self).__init__()# Call the parent class (Sprite) constructor
         
         self.vector=(0,0)
         self.image = pygame.image.load("ball2.png")#pygame.Surface([4, 10])
         #self.image.fill(BLACK)
+        self.playernick = playernick
+        #je hoeher der Wert, destso laenger die Strecke des Vektors und damit die Praezision und auch die Geschwindigkeit
+        
         self.rect = self.image.get_rect()
+        self.rect.x = xPosition
+        self.rect.y = yPosition
+        self.__realXPosition = xPosition
+        self.__realYPosition = yPosition
+        self.updateVector((eventPosition[0] - xPosition, eventPosition[1] - yPosition))
+        self.adjustedVector = (0, 0)
+        self.speed = 5 * speed
+        self.damage = damage
+
 
     def updateVector(self, vec):
         '''
@@ -38,6 +52,7 @@ class Bullet(pygame.sprite.Sprite):
         Parameter:      -
         return values:  -
         '''
+        #print 'len', math.hypot(self.vector[0], self.vector[1])
         return math.hypot(self.vector[0], self.vector[1])
 
         
@@ -47,25 +62,57 @@ class Bullet(pygame.sprite.Sprite):
         Paramter : -
         Rueckgabewerte: (x,y) (angepasster Vektor)
         '''
-        #muss n mal aufgerugen werden, soll, wenn es gegen eine Wand, hinderniss etc. fliegt
         length = self.lenVector()
         try:
-            x = (self.vector[0] / (length /10)) #5 Geschwindigkeit des Schusses
-            y = (self.vector[1] / (length /10))
-            return ((x+(length/100)),(y+(length/100)))
+            x = (self.vector[0] / length) #5 Geschwindigkeit des Schusses
+            y = (self.vector[1] / length)
+            self.adjustedVector = ((self.speed * x ), ((self.speed * y)))
+            
         except:
-            return self.vector
+            print 'except'
+            self.adjustedVector = self.vector
+        print self.adjustedVector
 
-        
- 
     def update(self):
         '''
         Bewegt die Kugel, benutzt dabei den Vektor, der mit adjustVektor angepasst wurde.
         Paramter : -
         Rueckgabewerte: -
         '''
-        newVec = self.adjustVector()
-        self.rect.y += newVec[1]
-        self.rect.x += newVec[0]
+        if self.adjustedVector == (0, 0):
+            self.adjustVector()
+        self.__realXPosition += self.adjustedVector[0]
+        self.__realYPosition += self.adjustedVector[1]
+        self.rect.x = int(self.__realXPosition)
+        self.rect.y = int(self.__realYPosition)
+        
+        
         
         #bullet.move_ip(vector)
+
+##################### Getters und Setters, die momentan nirgends gebraucht werden, aber dazu gehoeren #####################
+
+    def getDamage(self):
+        '''
+        gibt dem den Schaden der Bullet aus
+        Parameter:      -
+        return values:  Float damage der Bullet
+        '''
+        return self.dmg
+    
+    def setDamage(self, dmg):
+        '''
+        setzt den Schaden des Objektes Bullet
+        Parameter:      Float damage
+        return values:  -
+        '''
+        self.dmg = dmg
+
+    def getDirection(self):
+        '''
+        gibt dem die Richtung der Bullet aus
+        Parameter:      -
+        return values:  Tuple (Int, Int), Richtung in x und y
+        '''
+        return self.direction
+   
