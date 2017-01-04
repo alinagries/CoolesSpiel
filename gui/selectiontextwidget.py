@@ -146,12 +146,12 @@ class SelectionTextWidget(textwidget.TextWidget):
         index   = 0
         n       = 0
         if self._text:
-            for n in range(max(min(int(x / (self._font.size(self._text)[0] / length)), length - 1), 0), 0, -1):
+            for n in xrange(max(min(int(x / (self._font.size(self._text)[0] / length)), length - 1), 0), 0, -1):
                 if self._font.size(self._text[:n])[0] + self._font.metrics(self._text[n])[0][4] < x:
                     break
-            for index in range(n, length):
-                if self._font.size(self._text[:index])[0] + self._font.metrics(self._text[index])[0][4] > x:
+            for index in xrange(n, length):
+                if self._font.size(self._text[:index])[0] + (self._font.metrics(self._text[index])[0][4] * 1.5) > x:
                     break
-            else:
+            if x == self._font.size(self._text)[0]:
                 index += 1
         return index

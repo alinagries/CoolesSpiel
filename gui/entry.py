@@ -133,12 +133,12 @@ class Entry(selectiontextwidget.SelectionTextWidget):
         """
         surface = selectiontextwidget.SelectionTextWidget._getAppearance(self, *args)
         linesize = self._font.get_linesize()
-        surface.blit(self._font.render(str(self._text), pygame.SRCALPHA, self._foreground), (0, self.rect.centery - linesize))
+        surface.blit(self._font.render(str(self._text), pygame.SRCALPHA, self._foreground), (0, (self._bounds.height - linesize) / 2))
         if self.isFocused():
             cursor = pygame.Surface((2, linesize))
             cursor.fill(self._foreground)
-            surface.blit(cursor, (self._indexToPos(CURSOR), self.rect.centery - linesize))
+            surface.blit(cursor, (self._indexToPos(CURSOR), (self._bounds.height - linesize) / 2))
             selection = pygame.Surface((self._indexToPos(CURSOR) - self._indexToPos(SELECTION), linesize), pygame.SRCALPHA, 32)
             selection.fill(self._selectioncolor)
-            surface.blit(selection, (self._indexToPos(SELECTION), self.rect.centery - linesize))
+            surface.blit(selection, (self._indexToPos(SELECTION), (self._bounds.height - linesize) / 2))
         return surface
