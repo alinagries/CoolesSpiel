@@ -33,7 +33,7 @@ class SelectionTextWidget(textwidget.TextWidget):
         """
         textwidget.TextWidget.__init__(self, x, y, width, height, text, font)
         self._cursor = 0
-        self._selectionstart = 0
+        self._selection = 0
         self._selectioncolor = selectioncolor
 
     def setSelectionColor(self, color):
@@ -81,19 +81,18 @@ class SelectionTextWidget(textwidget.TextWidget):
         parameters:     int the amount the cursor should be moved by
         return values:  -
         """
-        self.setCursor(min(max(self.getActualIndex(CURSOR) + int(index), 0), len(self._text)))
+        self.setCursor(min(max(self.getActualIndex(CURSOR) + int(index), 0), self.getActualIndex(END)))
         
     def setSelection(self, start, end):
         """
         Set the SelectionTextWidget's selection between the given bounds
 
-        parameters:     int the index the cursor should be set to
+        parameters:     int the index the selection should start
+                        int the index the selection should end (cursor)
         return values:  -
         """
-        start                   = self.getActualIndex(start)
-        end                     = self.getActualIndex(end)
-        self._selectionstart    = min(start, end)
-        self._cursor            = max(start, end)
+        self._selection = self.getActualIndex(start)
+        self._cursor    = self.getActualIndex(end)
         self.markDirty()
 
     def getSelection(self):
@@ -104,7 +103,7 @@ class SelectionTextWidget(textwidget.TextWidget):
         return values:  int the startindex of the selection
                         int the endindex of the selection
         """
-        return self._selectionstart, self._cursor
+        return self._sort(self._selection, self._cursor)
 
     def getActualIndex(self, index):
         """
@@ -118,7 +117,7 @@ class SelectionTextWidget(textwidget.TextWidget):
         if index == END:
             return len(self._text)
         if index == SELECTION:
-            return self._selectionstart
+            return self._selection
         return abs(int(index))
 
     def _indexToPos(self, index):
@@ -142,16 +141,34 @@ class SelectionTextWidget(textwidget.TextWidget):
         return values:  int index given
         """
         length  = len(self._text)
-        x       = min(float(x), self._font.size(self._text)[0])
+        x       = min(float(x), (self._font.size(self._text[:-1])[0]
+                                 + self._font.size(self._text[-1:])[0] * 1.5))
         index   = 0
         n       = 0
         if self._text:
             for n in xrange(max(min(int(x / (self._font.size(self._text)[0] / length)), length - 1), 0), 0, -1):
-                if self._font.size(self._text[:n])[0] + self._font.metrics(self._text[n])[0][4] < x:
+                if self._font.size(self._text[:n])[0] + self._font.size(self._text[n])[0] < x:
                     break
             for index in xrange(n, length):
-                if self._font.size(self._text[:index])[0] + (self._font.metrics(self._text[index])[0][4] * 1.5) > x:
+                if self._font.size(self._text[:index])[0] + (self._font.size(self._text[index])[0] * 1.5) > x:
                     break
-            if x == self._font.size(self._text)[0]:
+            else:
                 index += 1
         return index
+
+    def _sort(self, i, n):
+        """
+        Return the indices in ascending order
+        
+        private function
+
+        parameters:     int an index
+                        int another index
+        return values:  int the first index
+                        int the second index
+        """
+        i = self.getActualIndex(i)
+        n = self.getActualIndex(n)
+        if i > n:
+            return n, i
+        return i, n

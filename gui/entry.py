@@ -78,9 +78,7 @@ class Entry(selectiontextwidget.SelectionTextWidget):
                         int the index till which the text should be deleted
         return values:  -
         """
-        indices = [self.getActualIndex(startindex), self.getActualIndex(endindex)]
-        indices.sort()
-        startindex, endindex = indices
+        startindex, endindex = self._sort(startindex, endindex)
         self.setText(self._text[:startindex] + self._text[endindex:])
 
     def update(self, *args):
@@ -97,24 +95,27 @@ class Entry(selectiontextwidget.SelectionTextWidget):
                     self.moveCursor(-1)
                 elif event.key == pygame.K_RIGHT:
                     self.moveCursor(1)
-                elif event.key == pygame.K_BACKSPACE:
-                    if self._selectionstart == self._cursor:
-                        self.delete(self._selectionstart - 1, CURSOR)
-                        self.moveCursor(-1)
+                elif event.key == pygame.K_BACKSPACE or event.key == pygame.K_DELETE:
+                    if self._selection == self._cursor:
+                        if event.key == pygame.K_DELETE:
+                            self.delete(self._selection + 1, CURSOR)
+                        else:
+                            self.delete(self._selection - 1, CURSOR)
+                            self.moveCursor(-1)
                     else:
                         self.delete(SELECTION, CURSOR)
-                        self.setCursor(self._selectionstart)
+                        self.setCursor(self._sort(SELECTION, CURSOR)[0])
                 else:
                     char = event.unicode.encode("ascii", "ignore")
                     if (char != "" and (char == " " or not char.isspace())
                     and self._validation(self._text + char, self._text, self)):
-                        s = self.getActualIndex(SELECTION)
-                        self.delete(s, CURSOR)
+                        self.delete(SELECTION, CURSOR)
+                        s = self._sort(SELECTION, CURSOR)[0]
                         self.insert(s, char)
                         self.setCursor(s + 1)
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if self.rect.collidepoint(event.pos):
-                    self.setSelection(CURSOR, self._posToIndex(event.pos[0] - self.rect.x))
+            elif event.type == pygame.MOUSEMOTION:
+                if self.rect.collidepoint(event.pos) and event.buttons[0]:
+                    self.setSelection(SELECTION, self._posToIndex(event.pos[0] - self.rect.x))
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
                     self.setCursor(self._posToIndex(event.pos[0] - self.rect.x))
@@ -138,7 +139,7 @@ class Entry(selectiontextwidget.SelectionTextWidget):
             cursor = pygame.Surface((2, linesize))
             cursor.fill(self._foreground)
             surface.blit(cursor, (self._indexToPos(CURSOR), (self._bounds.height - linesize) / 2))
-            selection = pygame.Surface((self._indexToPos(CURSOR) - self._indexToPos(SELECTION), linesize), pygame.SRCALPHA, 32)
+            selection = pygame.Surface((abs(self._indexToPos(CURSOR) - self._indexToPos(SELECTION)), linesize), pygame.SRCALPHA, 32)
             selection.fill(self._selectioncolor)
-            surface.blit(selection, (self._indexToPos(SELECTION), (self._bounds.height - linesize) / 2))
+            surface.blit(selection, (self._sort(self._indexToPos(CURSOR), self._indexToPos(SELECTION))[0] , (self._bounds.height - linesize) / 2))
         return surface

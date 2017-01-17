@@ -221,6 +221,10 @@ class Widget(pygame.sprite.DirtySprite):
         if self.isDirty():
             self.rect   = self._border.getBounds(self._bounds)
             self.image  = self._border.getBorderedImage(self._getAppearance(*args))
+            if not self.isActive():
+                inactive = self.image.copy()
+                nactive.fill(disabeledOverlay)
+                self.image.blit(unactive, (0, 0))
 
     def _getAppearance(self, *args):
         """
@@ -234,8 +238,4 @@ class Widget(pygame.sprite.DirtySprite):
         """
         surface = pygame.Surface(self._bounds.size, pygame.SRCALPHA)
         surface.fill(self._background)
-        if not self.isActive():
-            unactive = surface.copy()
-            unactive.fill(disabeledOverlay)
-            surface.blit(unactive, (0, 0))
         return surface

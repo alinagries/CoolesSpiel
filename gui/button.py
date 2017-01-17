@@ -124,17 +124,26 @@ class Button(textwidget.TextWidget):
             self.markDirty()
         if len(args) > 0 and self.isActive():
             event = args[0]
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONUP:
                 if self.rect.collidepoint(event.pos):
-                    self._state = 2
+                    if event.button == 1:
+                        try:
+                            self._callback()
+                        except:
+                            pass
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if self.rect.collidepoint(event.pos):
+                    if event.button == 1:
+                        self._state = 2
+                    else:
+                        self._state = 1
                     self.markDirty()
-                    try:
-                        self._callback()
-                    except:
-                        pass
             elif event.type == pygame.MOUSEMOTION:
                 if self.rect.collidepoint(event.pos):
-                    self._state = 1
+                    if event.buttons[0]:
+                        self._state = 2
+                    else:
+                        self._state = 1
                     self.markDirty()
 
         textwidget.TextWidget.update(self, *args)
@@ -155,7 +164,7 @@ class Button(textwidget.TextWidget):
         surface.blit(self._font.render(str(self._text), pygame.SRCALPHA, self._foreground), coords)
         if self._state:
             overlay = surface.copy()
-            if self._state >= 2:
+            if self._state == 2:
                 overlay.fill(self._pressedcolor)
             else:
                 overlay.fill(self._hoveredcolor)
