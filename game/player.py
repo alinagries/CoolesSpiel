@@ -1,5 +1,5 @@
 # -*- coding: cp1252 -*-
-#Autor/en:  Niclas, Gregor
+#Autor/en:  Lucas V., Niclas, Gregor
 #Datum:     ????
 #Version:   1.0
 
