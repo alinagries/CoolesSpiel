@@ -5,11 +5,13 @@
 
 from decimal import Decimal
 from bullet import Bullet
+import pygame
 import time
 
- 
-class Weapon():
-    def __init__(self, firerate = 1, bulletspeed = 1, damage = 2, ammo = Decimal("Infinity")):
+BLUE = (0, 0, 255)
+
+class Weapon(pygame.sprite.Sprite):
+    def __init__(self, firerate = 0.2, bulletspeed = 1, damage = 2, ammo = Decimal("Infinity")):
         '''
         Initialisation von Weapon
         Parameter:      Float firerate, schuss nach seckunde * Firerate erlaubt
@@ -18,28 +20,34 @@ class Weapon():
                         int/Decimal("Infinity") ammo, Munition der Waffe
         return values:  -
         '''
-        self.bulletsize = (1,3)
+        super(Weapon, self).__init__()
+        self.image = pygame.Surface([10, 10])
+        self.rect = self.image.get_rect()
+        self.image.fill(BLUE)
+        
         self.firerate = firerate
         self.bulletspeed = bulletspeed
         self.dmg = damage
         self.ammo = ammo
-        self.lastShotTime = -firerate
+        self.lastShotTime = -self.firerate
+        
 
-
-    def createBullet(self, position): #(Int, Int)
+    def createBullet(self, position, eventPos, playernick):#eventPos = Zielposition
         '''
         Falls eine Kugel geschossen werden darf (einzige Grund warum das nicht
         gehen sollte, ist seobald die Schussgeschwindigkeit ueberschritten wird)
         dann wird die ammo um 1 verringert und eine Bullet erzeugt
         Parameter:      Tuple (int, int) position, der neuen Bullet
+                        Tuple (int, int) Zielposition der neuen Bullet
+                        String, Nickname des Spielers, der schiesst
         return values:  Bullet oder None (nur wenn schuss nicht erlaubt)
         '''
         if self.shotAllowed():
             self.ammo -= 1
-            bullet = Bullet((position, self.bulletsize), self.direction, self.bulletspeed, self.dmg)
+            bullet = Bullet(position[0], position[1], eventPos, self.bulletspeed, self.dmg, playernick)
             return bullet
         else:
-            print 'shot not Allowed'
+            print 'shot not Allowed in createBullet unter weapon.py'
     
     def shotAllowed(self):
         '''
@@ -47,10 +55,10 @@ class Weapon():
         Parameter:      -
         return values:  Boolean
         '''
-        if time.clock() - (self.lastShotTime + self.firerate) > 0 and self.ammo:
+        if time.clock() - (self.lastShotTime + self.firerate) >= 0 and self.ammo:
             self.lastShotTime = time.clock()
             return True
-        
+
 ##################### Getters und Setters, die momentan nirgends gebraucht werden, aber dazu gehoeren #####################
             
     def getFirerate(self):
@@ -67,11 +75,12 @@ class Weapon():
         Parameter:      Float, feuerrate der Waffe
         return values:  -
         '''
+        self.lastShotTime = -firerate
         self.firerate = firerate
         
     def getBulletspeed(self):
         '''
-        gibt die Geschwindigkeit der Bullets, der Waffe
+        gibt die Geschwindigkeit der Bullets, der Waffe aus
         Parameter:      -
         return values:  Float, Geschwindigkeit der Bullet, der Waffe
         '''
