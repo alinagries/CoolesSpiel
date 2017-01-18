@@ -1,55 +1,106 @@
-# -*- coding: cp1252 -*-
-#Datum :    07.12.16
-#Autor/en:  Lucas V.
-#Version:   1.0
+#Autor/en:  Lucas V., Niclas, Gregor
+#Version:   2.4
 
-from sectorialdivision import SectorialDivision
-from entity import Entity
+import pygame
 import math
 
-class Bullet(Entity):
-    def __init__(self, rect = (0, 0, 1, 2), speed = 1, damage = 2):
-        '''
-        Initialisation von Bullet
-        Parameter:      rect
-                            int mit der distanz nach links
-                            int mit der disanz nach oben
-                            int width von dem Objekt
-                            int heigth von dem Objekt
-                        Flaot speed von der Bullet (Bewegungsgeschwindigkeit)
-                        Flaot damage von der Bullet
-        return values:  -
-        '''
-        Entity.__init__(self, rect, speed)
-        self.dmg = damage
-        self.__pixelLength = 10 #Int
-        self.__r = self.__pixelLength / math.hypot(direction[0], direction[1]) #Int / (Int^2 + Int^2) 
-        #r * |direction| = pixelLength --> r = pixelLength / |direction| --> r * |direction| kann alle 10 pixel (self.__pixelLength) berechnet werden
-        ##|direction| = directionlaenge in Pixel        
+BLACK = (0, 0, 0)
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, xPosition, yPosition, eventPosition, speed = 1, damage = 2, playernick = 'someone', allowedPosition = True):
+        """
+        Initialisierung der Klasse Bullet
+        Parameter:      int xPosition, die xPosition der Bullet
+                        int yPosition, die yPosition der Bullet
+                        Tuple (int, int), dei Zielposition der Bullet
+                        float speed, die geschwindigkeit der Bullet
+                        float damage, der Schaden der Bullet
+        return value:   -
+        """
+        super(Bullet, self).__init__()# Call the parent class (Sprite) constructor
         
-    def move(self):
+
+        self.direction = (0,0)
+        self.updateDirection((eventPosition[0] - xPosition, eventPosition[1] - yPosition))
+
+        self.image = pygame.Surface([2, 4])
+        self.playernick = playernick
+        self.allowedPosition = True
+        
+        rotation = math.acos(self.direction[1]/(math.sqrt(1)*math.sqrt(self.direction[0]**2+self.direction[1]**2)))
+        self.image = pygame.transform.rotate(self.image, math.degrees(rotation))
+        
+        self.rect = self.image.get_rect()
+        self.rect.x = xPosition
+        self.rect.y = yPosition
+        self.__realXPosition = xPosition
+        self.__realYPosition = yPosition
+        self.adjustedDirection = (0, 0)
+        self.speed = 5 * speed
+        self.damage = damage
+        self.allowedPosition = allowedPosition
+
+
+    def updateDirection(self, direction):
         '''
-        berechnet & setzt die naechste position der Bullet
+        updatet die Flugrichtung der Bullet
         Parameter:      -
         return values:  -
         '''
-        x = self.rect[0] #Int
-        y = self.rect[1] #Int
-        directionX = self.direction[0] #Int
-        directionY = self.direction[1] #Int  
-        newXPosition = x + self.__r * directionX * self.speed #Int + float * Int * float
-        newYPosition = y + self.__r * directionY * self.speed #Int + float * Int * float
+        self.direction = direction
+
+    def lenDirection(self):
+        '''
+        errechnet die laenge des Vektors mit hypot
+        Parameter:      -
+        return values:  -
+        '''
+        return math.hypot(self.direction[0], self.direction[1])
+
         
-        self.rect[0] = int(newXPosition)
-        self.rect[1] = int(newYPosition)
+    def adjustDirection(self):
+        '''
+        Gleicht den Vektor an, sodass die Kugel nicht schneller wird, wenn das Event weiter vom Spieler entfernt ist.
+        Paramter : -
+        Rueckgabewerte: (x,y) (angepasster Vektor)
+        '''
+        length = self.lenDirection()
+        try:
+            x = (self.direction[0] / length) #5 Geschwindigkeit des Schusses
+            y = (self.direction[1] / length)
+            self.adjustedDirection = ((self.speed * x ), ((self.speed * y)))
+            
+        except:
+            #print 'except'
+            self.adjustedDirection = self.direction
+        #print self.adjustedDirection
+
+    def update(self):
+        '''
+        Bewegt die Kugel, benutzt dabei den Vektor, der mit adjustVektor angepasst wurde.
+        Falls die Bullet gegen eine Wand fliegt wird diese removt
+        Paramter :      -
+        Rueckgabewerte: -
+        '''
         
+        if self.adjustedDirection == (0, 0):
+            self.adjustDirection()
+            
+        self.__realXPosition += self.adjustedDirection[0]
+        self.__realYPosition += self.adjustedDirection[1]
+        self.rect.x = int(self.__realXPosition)
+        self.rect.y = int(self.__realYPosition)
+        
+    
+        
+
 ##################### Getters und Setters, die momentan nirgends gebraucht werden, aber dazu gehoeren #####################
-        
+
     def getDamage(self):
         '''
         gibt dem den Schaden der Bullet aus
         Parameter:      -
-        return values:  Float damage der Bullet
+        return values:  Float, damage der Bullet
         '''
         return self.dmg
     
@@ -60,3 +111,13 @@ class Bullet(Entity):
         return values:  -
         '''
         self.dmg = dmg
+
+    def getDirection(self):
+        '''
+        gibt dem die Richtung der Bullet aus
+        Parameter:      -
+        return values:  Tuple (Int, Int), Richtung in x und y
+        '''
+        return self.direction
+    
+
