@@ -1,52 +1,72 @@
 # -*- coding: cp1252 -*-
-#Datum :    07-22.12.16
-#Autor/en:  Alina, Lucas V.
+#Autor/en:  Niclas, Gregor
+#Datum:     ????
 #Version:   1.0
 
-from entity import Entity
 from weapon import Weapon
-'''
-Ein Player ist ein Objekt, das einen Namen/Erkennung (Nick), Position, Hp, Geschwindigkeit und eine Waffe hat.
-er braucht eine Referenz zu einem game ueber den Server oder Client 
-'''
+import pygame
 
-class Player(Entity):
-    def __init__(self, nick, rect = (0, 0, 3, 1), hitPoints = 20, speed = 1):
-        '''
-        Initialisation von Player
-        Parameter:      rect
-                            int mit der distanz nach links
-                            int mit der disanz nach oben
-                            int width von dem Objekt
-                            int heigth von dem Objekt
-                        Float Hitpoints vom Spieler
-                        Float Bewegungsgeschwindigkeit vom Spieler
-        return values:  -
-        '''
-        Entity.__init__(self, rect, speed)
-        self.game = 0
+GREEN = (0, 255, 0)
+
+class Player(pygame.sprite.Sprite):
+    """ This class represents the Player. """
+ 
+    def __init__(self, nick = 'Lucas', hitPoints = 20, speed = 2):
+        """ Set up the player on creation. """
+        super(Player,self).__init__()
+ 
+        self.image = pygame.Surface([20, 20])
+        self.rect = self.image.get_rect()
+        self.image.fill(GREEN)
+        
         self.nick = nick
         self.hp = hitPoints
-        self.weapon = self.secondaryWeapon()
-        
-        self.amors = []
-    
-    def shoot(self):
+        self.speed = speed
+        self.secondaryWeapon()
+ 
+    def update(self, gamemap):
+        '''
+        updated Den Playerbewegungen beim (knopfdruck events)
+        Parameter:      Spielobjekt, gamemap
+        return Value:   -
+        '''
+        keys = pygame.key.get_pressed()
+        newRect = self.rect
+        if keys[pygame.K_w]:
+            newRect = self.rect.move(0, -self.speed)
+        if keys[pygame.K_s]:
+            newRect = self.rect.move(0, self.speed)
+        if keys[pygame.K_a]:
+            newRect = self.rect.move(-self.speed, 0)
+        if keys[pygame.K_d]:
+            newRect = self.rect.move(self.speed, 0)
+        if gamemap.isRectValid(newRect):
+            self.rect = newRect
+        #self.rect.clamp_ip(screen.get_rect())
+
+    def shoot(self, xPos, yPos, eventPos):
         '''
         Wenn moeglich (hoechstens wegen der zu vielen schussversuchen pro
         Sekunde nicht moeglich) wird ein Objekt Bullet erstellt.
         Falls keine Munition mehr vorhanden ist auf Standartwaffe wechseln
-        Parameter:      -
+        Parameter:      int xPos, die x-Position des Spielers
+                        int yPos, die y-Position des Spielers
+                        Tuple (int, int), das Ziel des Schusses
         return values:  Boolean ODER None
                             je nachdem ob die Waffe einen schuss abfeuern darf
                             bsp. bei einer Waffengeschwindigkeit von 1 darf nach
                             0.5 Sekunden kein weiterer Schuss abgefeuert werden
         '''
-        position = self.rect[0], self.rect[1]
+        bullet = None
+        position = xPos, yPos
         weapon = self.weapon
-        bullet = weapon.createBullet(position)
+        try:
+            bullet = weapon.createBullet(position, eventPos, self.nick)#eventPos = Zielposition
+        except:
+            print 'bullet wird in shot unter player.py nicht erzeugt'
         if weapon.ammo == 0:
-            self.weapon = self.secondaryWeapon()
+            self.secondaryWeapon()
+            
         return bullet
         
     def secondaryWeapon(self):
@@ -56,65 +76,17 @@ class Player(Entity):
         return values:  -
         '''
         self.weapon = Weapon()
-    
-    def addTrap(self, trap):
-        '''
-        fuegt ein trapobjekt der trapliste hinzu
-        Parameter:      Trapobjekt
-        return values:  -
-        '''
-        self.traps.append(trap)
         
-    def removeTrap(self, trap):
-        '''
-        nimmt einen trap aus der trapliste heraus
-        Parameter:      trap objekt
-        return values:  -
-        '''
-        self.traps.remove(trap)
-        
-    def useTrap(self, trap):
-        '''
-        nimmt einen trap aus der trapliste heraus und platziert sie auf der map
-        Parameter:      trap objekt
-        return values:  -
-        '''
-        trap.place(self.getPosition())
-        self.traps.remove(trap)
-        #muss noch im game plaziert werden
-        
-    def addAmor(self, armor):
-        '''
-        hinzufuegen einer ruestung an die Ruestungsliste
-        Parameter:      Ruestungsobjekt
-        return values:  -
-        '''
-        self.amors.append(armor)
-        
-    def removeArmor(self, armor):
-        '''
-        entfernen einer Ruestung aus der Ruestungsliste
-        Parameter:      Ruestungsobjekt
-        return values:  -
-        '''
-        self.armors.remove(armor)
-    
     def isHit(self, damage):
         '''
         errechnung der Spielerhitpoints nach einem treffer
         Parameter:      Float, damage gegen den Spieler
         return values:  -
         '''
-        resistance = 0
-        for armor in self.armors:
-            resistance += armor.getResistance()
-            armor.use()
-            if armor.durability == 0:
-                self.removeArmor(armor)
-        remainingDamage = damage - resistance
-        if remainingDamage > 0:
-            self.hp -= remainingDamage
-            
+        self.hp -= damage
+        
+    def equipWeapon(self, weapon):
+        self.weapon = weapon
             
 ##################### Getters und Setters, die momentan nirgends gebraucht werden, aber dazu gehoeren #####################
 
@@ -165,4 +137,3 @@ class Player(Entity):
         return values:  -
         '''
         self.weapon = weapon
-    
