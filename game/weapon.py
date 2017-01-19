@@ -58,6 +58,84 @@ class Weapon(pygame.sprite.Sprite):
         if time.clock() - (self.lastShotTime + self.firerate) >= 0 and self.ammo:
             self.lastShotTime = time.clock()
             return True
+    
+    def createSplitBullet(self, position, angle, ammount, eventPos, playernick):#eventPos = Zielposition
+        '''
+        Das Selbe wie createBullet, bekommt aber noch Winkel und Anzahl und ruft vSplit auf
+        Parameter:      Tuple (int, int) position, der neuen Bullet
+                        Int, angle
+                        Int, amount
+                        Tuple (int, int), eventPos, Ziel der neuen Bullet
+                        String, Nickname des Spielers, der schiesst
+        return values:  Bullet oder None (nur wenn schuss nicht erlaubt)
+        '''
+        if self.shotAllowed():
+            self.ammo -= 1
+            list = vSplit(eventPos, angle, amount)
+            a=0
+            for k in list:
+                bullet += Bullet(position[0], position[1], (list[a],list[a+1]), self.bulletspeed, self.dmg, playernick)
+                a+=2
+            return bullet
+        else:
+            print 'shot not Allowed in createBullet unter weapon.py'
+    
+    def vSplit(direction, angle, amount):
+        '''
+        vSplit dient der Verfielfachung von Vektoren fuer
+        Streuschuesse(fuer spezif. Waffen).
+ 
+        vSplit benoetigt einen Vektor(vector), einen Winkel, innerhalb dem die neuen
+        Vektoren gestreut werden sollen(angle) und die Anzahl der zu streuenden
+        Vektoren(amount)   -> ((x,y),1-180,1-...).
+        vSplit gibt die Liste newV aus, in der hintereinander die x & y-Werte der
+        Vektoren aufgeführt werden.
+        Wird für amount eine ungerade Zahl gewaehlt, so ist der angegebene Vektor Teil
+        von newV. Ist amount gerade, so fehlt der Anfangsvektor in der Mitte.
+        Parameter:      Tuple (int, int), direction
+                        int, angel
+                        int, amount
+        return Values:  -
+        '''
+        xDirection = direction[0]
+        yDirection = direction[1]
+        hz = amount/2
+        newV = ()
+        ausX = math.hypot(xDirection, yDirection)*(float(angle)/180)
+        ausY = math.sqrt(((math.hypot(xDirection, yDirection)**2)) + (ausX)**2)
+ 
+        for f in range(0, amount):
+            aktX = (float((f+1))/hz)*ausX
+            akktX = aktX
+            zt = (math.hypot(xDirection, yDirection))
+            aktX = -aktX + xDirection
+
+            #LINKS
+            if f <= hz:
+                if -aktX > zt:
+                    r = -aktX - zt
+                    aktX = -zt +r
+                aktY = math.sqrt((math.hypot(xDirection, yDirection)**2) - (aktX)**2)
+                if yDirection < 0 and -yDirection > akktX:
+                    aktY = -aktY
+                newV += (aktX, aktY)
+
+            #ggf. MITTE
+            elif amount%2:
+                newV+=(xDirection, yDirection)
+
+            #RECHTS
+            else:
+                if aktX > zt:
+                    r = aktX - zt
+                    aktX = zt + r
+                aktY = math.sqrt((math.hypot(xDirection, yxDirection)**2) - (aktX)**2)
+                if yDirection < 0 and -yDirection > akktX:
+                    aktY = -aktY
+                newV+=(aktX, aktY)
+
+        return newV
+    
 
 ##################### Getters und Setters, die momentan nirgends gebraucht werden, aber dazu gehoeren #####################
             
