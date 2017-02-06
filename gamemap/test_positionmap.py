@@ -30,7 +30,7 @@ def createFromImage():
     Erstellen der PositionMap durch eine Bilddatei (map.png)
 
     Parameter:      -
-    Rückgabewerte:  -
+    RÃ¼ckgabewerte:  -
     """
     global m
     m = positionmap.createByImage()
@@ -40,7 +40,7 @@ def createFromList():
     Erstellen der PositionMap durch eine Liste
     
     Parameter:      -
-    Rückgabewerte:  -
+    RÃ¼ckgabewerte:  -
     """
     global m
     l = (
@@ -87,10 +87,10 @@ def saveMap():
 
 def mapScaleUp():
     """
-    Vergrößern der PositionMap
+    VergrÃ¶ÃŸern der PositionMap
     
     Parameter:      -
-    Rückgabewerte:  -
+    RÃ¼ckgabewerte:  -
     """
     global m
     m = positionmap.scale(m, 2)
@@ -100,17 +100,17 @@ def mapScaleDown():
     Verkleinern der PositionMap
     
     Parameter:      -
-    Rückgabewerte:  -
+    RÃ¼ckgabewerte:  -
     """
     global m
     m = positionmap.scale(m, 0.5)
 
 def mapFullscreen():
     """
-    Vergrößern der PositionMap, sodass sie den gesammten Bildschrim einnimmt
+    VergrÃ¶ÃŸern der PositionMap, sodass sie den gesammten Bildschrim einnimmt
     
     Parameter:      -
-    Rückgabewerte:  -
+    RÃ¼ckgabewerte:  -
     """
     global m, screen
     monitorinfo = pygame.display.Info()
@@ -121,7 +121,7 @@ def mapDraw():
     Anzeigen der PositionMap durch wiederholtes Zeichnen eines Pixels
     
     Parameter:      -
-    Rückgabewerte:  -
+    RÃ¼ckgabewerte:  -
     """
     global m, screen
     stop = False
@@ -135,7 +135,7 @@ def mapDrawPixel():
     Anzeigen der PositionMap durch wiederholtes Zeichnen einer Reihe von Pixeln
     
     Parameter:      -
-    Rückgabewerte:  -
+    RÃ¼ckgabewerte:  -
     """
     global m, screen, rc, stop
     stop = False
@@ -156,7 +156,7 @@ def mapDrawPixelSlow():
     Anzeigen der PositionMap durch wiederholtes Zeichnen eines Pixels
     
     Parameter:      -
-    Rückgabewerte:  -
+    RÃ¼ckgabewerte:  -
     """
     global m, screen, rc, stop
     stop = False
@@ -174,10 +174,10 @@ def mapDrawPixelSlow():
 
 def printHelp():
     """
-    Ausgabe der Hilfe für das Testcript
+    Ausgabe der Hilfe fÃ¼r das Testcript
     
     Parameter:      -
-    Rückgabewerte:  -
+    RÃ¼ckgabewerte:  -
     """
     for ln in testhelp:
         print ln
@@ -187,7 +187,7 @@ def handleInput():
     Behandeln von User-Input durch die GUI
     
     Parameter:      -
-    Rückgabewerte:  -
+    RÃ¼ckgabewerte:  -
     """
     global rc, m, stop, mode
     for event in pygame.event.get():
