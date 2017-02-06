@@ -8,7 +8,7 @@ def createByImage(path = "map.png"):
     Pixel mit den RGB-Werten 0 (schwarz) werden als invalide Positionen interpretiert
 
     Parameter:      string Pfadangabe zu der Bilddatei
-    Rückgabewerte:  PositionMap das Ergebnis
+    RÃ¼ckgabewerte:  PositionMap das Ergebnis
     """
     try:
         mapdata = pygame.image.load(path)
@@ -21,11 +21,11 @@ def createByImage(path = "map.png"):
 
 def createBySurface(surface):
     """
-    Erstellen einer PositionMap durch eine Bildfläche
+    Erstellen einer PositionMap durch eine BildflÃ¤che
     Pixel mit dem RGB-Wert 0 (schwarz) werden als invalide Positionen interpretiert
 
-    Parameter:      pygame.Surface die Bildfläche im beschriebenen Format
-    Rückgabewerte:  PositionMap das Ergebnis
+    Parameter:      pygame.Surface die BildflÃ¤che im beschriebenen Format
+    RÃ¼ckgabewerte:  PositionMap das Ergebnis
     """
     m       = PositionMap()
     size    = surface.get_size()
@@ -45,11 +45,11 @@ def createBySurface(surface):
 def createByList(l = []):
     """
     Erstellen einer PositionMap durch eine Liste mit Strings
-    die Breite der Listeneinträge und die Länge der Liste entsprechen der Breite und Höhe der PositionMap
-    Alle Zeichen außer Leerzeichen werden als invalid interpretiert
+    die Breite der ListeneintrÃ¤ge und die LÃ¤nge der Liste entsprechen der Breite und HÃ¶he der PositionMap
+    Alle Zeichen auÃŸer Leerzeichen werden als invalid interpretiert
     
     Parameter:      list Liste mit Strings im beschriebenen Format
-    Rückgabewerte:  PositionMap das Ergebnis
+    RÃ¼ckgabewerte:  PositionMap das Ergebnis
     """
     m       = PositionMap()
     invalid = []
@@ -76,8 +76,8 @@ def scale(m, scale = 1):
     Skalieren einer PositionMap durch ein Skalar
     
     Parameter:      PositionMap die zu skalierende PositionMap
-                    int das Skalar oder tuple jeweils ein Wert für beide Dimensionen
-    Rückgabewerte:  PositionMap das Ergebnis
+                    int das Skalar oder tuple jeweils ein Wert fÃ¼r beide Dimensionen
+    RÃ¼ckgabewerte:  PositionMap das Ergebnis
     """
     if isinstance(scale, tuple):
         scaleX = abs(scale[0])
@@ -92,7 +92,7 @@ def scale(m, scale = 1):
 class PositionMap:
 
     """
-    Klasse für eine PositionMap mit validen und nicht-validen Positionen
+    Klasse fÃ¼r eine PositionMap mit validen und nicht-validen Positionen
     """
 
     def __init__(self):
@@ -100,7 +100,7 @@ class PositionMap:
         Initialisation einer PositionMap
 
         Parameter:      -
-        Rückgabewerte:  -
+        RÃ¼ckgabewerte:  -
         """
         self._width     = 0
         self._height    = 0
@@ -108,28 +108,28 @@ class PositionMap:
     
     def getWidth(self):
         """
-        Zurückgeben der Breite der PositionMap
+        ZurÃ¼ckgeben der Breite der PositionMap
 
         Parameter:      -
-        Rückgabewerte:  int Breite der PositionMap
+        RÃ¼ckgabewerte:  int Breite der PositionMap
         """
         return self._width
 
     def getHeight(self):
         """
-        Zurückgeben der Höhe der PositionMap
+        ZurÃ¼ckgeben der HÃ¶he der PositionMap
 
         Parameter:      -
-        Rückgabewerte:  int Höhe der PositionMap
+        RÃ¼ckgabewerte:  int HÃ¶he der PositionMap
         """
         return self._height
 
     def getLengthInvalidPositions(self):
         """
-        Zurückgeben der Anzahl an invaliden Positionen der PositionMap
+        ZurÃ¼ckgeben der Anzahl an invaliden Positionen der PositionMap
 
         Parameter:      -
-        Rückgabewerte:  int Anzahl an invaliden Positionen der PositionMap
+        RÃ¼ckgabewerte:  int Anzahl an invaliden Positionen der PositionMap
         """
         return len(self._invalidPositions)
 
@@ -138,28 +138,28 @@ class PositionMap:
         Setzen der Breite der PositionMap, falls sie nicht gesetzt wurde
 
         Parameter:      int Breite der PositionMap
-        Rückgabewerte:  -
+        RÃ¼ckgabewerte:  -
         """
         if not self._width:
             self._width = int(width)
 
     def setHeight(self, height):
         """
-        Setzen der Höhe der PositionMap, falls sie nicht gesetzt wurde
+        Setzen der HÃ¶he der PositionMap, falls sie nicht gesetzt wurde
 
-        Parameter:      int Höhe der PositionMap
-        Rückgabewerte:  -
+        Parameter:      int HÃ¶he der PositionMap
+        RÃ¼ckgabewerte:  -
         """
         if not self._height:
             self._height = int(height)
 
     def isPositionValid(self, x, y):
         """
-        Zurückgeben ob die PositionMap an der angegebenen Position begehbar ist bzw. ob die Position valide ist
+        ZurÃ¼ckgeben ob die PositionMap an der angegebenen Position begehbar ist bzw. ob die Position valide ist
 
-        Parameter:      int x-Koordinate der zu überprüfenden Position
-                        int y-Koordinate der zu überprüfenden Position
-        Rückgabewerte:  bool ob die PositionMap an der angegebenen Position begehbar ist
+        Parameter:      int x-Koordinate der zu Ã¼berprÃ¼fenden Position
+                        int y-Koordinate der zu Ã¼berprÃ¼fenden Position
+        RÃ¼ckgabewerte:  bool ob die PositionMap an der angegebenen Position begehbar ist
         """
         if x >= self._width:
             return False
@@ -173,10 +173,10 @@ class PositionMap:
     
     def isRectValid(self, rect):
         """
-        Zurückgeben ob ein Bereich der PositionMap begehbar ist bzw. ob der Bereich vollkommen valide ist
+        ZurÃ¼ckgeben ob ein Bereich der PositionMap begehbar ist bzw. ob der Bereich vollkommen valide ist
 
-        Parameter:      pygame.Rect der zu überprüfende Bereich
-        Rückgabewerte:  bool ob Bereich der PositionMap begehbar ist
+        Parameter:      pygame.Rect der zu Ã¼berprÃ¼fende Bereich
+        RÃ¼ckgabewerte:  bool ob Bereich der PositionMap begehbar ist
         """
         for x in xrange(rect.width):
             for y in xrange(rect.height):
@@ -186,12 +186,12 @@ class PositionMap:
 
     def toSurface(self):
         """
-        Zurückgeben einer Bildfläche, die die PositionMap repräsentiert
+        ZurÃ¼ckgeben einer BildflÃ¤che, die die PositionMap reprÃ¤sentiert
         invalide Positionen werden als Pixel mit den RGB-Werten 0 (schwarz) dargestellt
-        valide Positionen wrden als Pixel mit den RGB-Werten 255 (weiß) dargestellt
+        valide Positionen wrden als Pixel mit den RGB-Werten 255 (weiÃŸ) dargestellt
 
         Parameter:      -
-        Rückgabewerte:  pygame.Surface das Ergebnis
+        RÃ¼ckgabewerte:  pygame.Surface das Ergebnis
         """
         surface = pygame.Surface((self.getWidth(), self.getHeight()), 0, 32)
         surface.fill((255, 255, 255))
