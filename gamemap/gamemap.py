@@ -1,6 +1,7 @@
 # -*- coding: cp1252 -*-
 
 import positionmap
+import pygame
 
 def createByImage(path = "map.png"):
     """

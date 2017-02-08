@@ -13,7 +13,7 @@ rc          = False
 stop        = False
 mode        = "n"
 testhelp    = ("Press following keys for respective actions:",
-               "r: Toggle color randomness (pixel-drawingmode only)",
+               "t: Toggle color randomness (pixel-drawingmode only)",
                "i: Print info about the status of the PositionMap",
                "b: Create the PositionMap from an image in the same folder (map.png)",
                "l: Create the PositionMap from a list defined in the sourcecode",
@@ -23,7 +23,8 @@ testhelp    = ("Press following keys for respective actions:",
                "Down-key: Create an imagefile (result.png) with the current state of the PositionMap",
                "n: Switch to normal-drawing mode; Draws the PositionMap according to mapobject.toSurface()",
                "p: Switch to pixel-drawing mode; Draws the PositionMap by drawing a row of pixels individually",
-               "s: Switch to slow pixel-drawing mode; Draws the PositionMap drawing each pixel individually")
+               "s: Switch to slow pixel-drawing mode; Draws the PositionMap drawing each pixel individually",
+               "r: Switch to slow pixel-drawing mode; Draws the PositionMap drawing each pixel individually at a random position")
 
 def createFromImage():
     """
@@ -172,6 +173,29 @@ def mapDrawPixelSlow():
             if stop:
                 return
 
+def mapDrawPixelRandom():
+    """
+    Anzeigen der PositionMap durch wiederholtes Zeichnen eines Pixels an zuf�lliger Stelle
+    
+    Parameter:      -
+    Rückgabewerte:  -
+    """
+    global m, screen, rc, stop
+    stop = False
+    color = (250, 150, 100)
+    while True:
+        for n in range(m.getHeight()):
+            x, y = random.randint(0, m.getWidth()), random.randint(0, m.getHeight())
+            if rc:
+                color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+            if not m.isPositionValid(x, y):
+                pygame.gfxdraw.pixel(screen, x, y, color)
+        handleInput()
+        pygame.display.update()
+        if stop:
+            screen.fill((255, 255, 255))
+            return
+
 def printHelp():
     """
     Ausgabe der Hilfe für das Testcript
@@ -197,7 +221,7 @@ def handleInput():
         if event.type == pygame.KEYDOWN:
             key = event.unicode.encode("ascii", "ignore").lower()
 
-            if key == "r":
+            if key == "t":
                 rc = not rc
             if key == "i":
                 print "invalid Positions:", m.getLengthInvalidPositions(), "possible Positions:", m.getWidth() * m.getHeight()
@@ -216,7 +240,7 @@ def handleInput():
             if event.key == pygame.K_DOWN:
                 saveMap()
             
-            if key in ("n", "p", "s"):
+            if key in ("n", "p", "s", "r"):
                 mode = key
                 stop = True
 
@@ -230,6 +254,8 @@ if __name__ == "__main__":
             mapDrawPixel()
         elif mode == "s":
             mapDrawPixelSlow()
+        elif mode == "r":
+            mapDrawPixelRandom()
         else:
             mapDraw()
         screen.fill((255, 255, 255))
