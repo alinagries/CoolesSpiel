@@ -83,6 +83,27 @@ class Widget(pygame.sprite.DirtySprite):
         """
         return self.dirty >= 2
 
+    def setVisible(self, visible):
+        """
+        Set the Widget as visible
+
+        parameters:     boolean if the Widget should be focused
+        return values:  Widget Widget returned for convenience
+        """
+        if self.visible != bool(visible):
+            self.visible = bool(visible)
+            self.setActive(bool(visible))
+        return self
+    
+    def isVisible(self):
+        """
+        Return if the Widget is visible
+
+        parameters:     -
+        return values:  boolean is the Widget visible
+        """
+        return self.visible
+
     def setFocused(self, focused):
         """
         Set the Widget as focused
@@ -111,8 +132,9 @@ class Widget(pygame.sprite.DirtySprite):
         parameters:     boolean if the Widget should be active
         return values:  Widget Widget returned for convenience
         """
-        self._active = bool(active)
-        self.markDirty()
+        if self._active != bool(active):
+            self._active = bool(active)
+            self.markDirty()
         return self
 
     def isActive(self):
@@ -223,8 +245,8 @@ class Widget(pygame.sprite.DirtySprite):
             self.image  = self._border.getBorderedImage(self._getAppearance(*args))
             if not self.isActive():
                 inactive = self.image.copy()
-                nactive.fill(disabeledOverlay)
-                self.image.blit(unactive, (0, 0))
+                inactive.fill(disabeledOverlay)
+                self.image.blit(inactive, (0, 0))
 
     def _getAppearance(self, *args):
         """
