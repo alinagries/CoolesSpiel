@@ -91,7 +91,7 @@ class Listbox(selectiontextwidget.SelectionTextWidget):
         Insert a given object into the list at the given index
 
         parameters:     int the index the object should be insterted at
-                        type the object to be inserted
+                        object the object to be inserted
         return values:  -
         """
         index = self.getActualIndex(index)
@@ -117,13 +117,9 @@ class Listbox(selectiontextwidget.SelectionTextWidget):
         parameters:     object object representing the index
         return values:  int the actual index of the Listbox's text
         """
-        if index == CURSOR:
-            return self._cursor
         if index == END:
             return len(self._list)
-        if index == SELECTION:
-            return self._selection
-        return abs(int(index))
+        return selectiontextwidget.SelectionTextWidget.getActualIndex(self, index)
 
     def _indexToPos(self, index):
         """
