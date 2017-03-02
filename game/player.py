@@ -5,6 +5,7 @@
 
 from weapon import Weapon
 import pygame
+import room
 
 GREEN = (0, 255, 0)
 
@@ -23,6 +24,9 @@ class Player(pygame.sprite.Sprite):
         self.hp = hitPoints
         self.speed = speed
         self.secondaryWeapon()
+
+    def setParent(self, parent):
+        self.parent = parent
  
     def update(self, gamemap):
         '''
@@ -30,6 +34,8 @@ class Player(pygame.sprite.Sprite):
         Parameter:      Spielobjekt, gamemap
         return Value:   -
         '''
+        #gamemap = gp[0]
+        #parent = gp[1]
         keys = pygame.key.get_pressed()
         newRect = self.rect
         if keys[pygame.K_w]:
@@ -42,6 +48,12 @@ class Player(pygame.sprite.Sprite):
             newRect = self.rect.move(self.speed, 0)
         if gamemap.isRectValid(newRect):
             self.rect = newRect
+        if gamemap.isDoorRectValid(newRect):
+            print self.parent
+            self.parent.changeRoom(room.Room("map"))
+            print "Raumwechsel"
+            
+        
         #self.rect.clamp_ip(screen.get_rect())
 
     def shoot(self, xPos, yPos, eventPos):

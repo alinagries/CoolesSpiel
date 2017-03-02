@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #Datum :    22/23.12.16
-#Autor/en: Kai K.
+#Autor/en: Kai K. , kerimm<<<aa
 #Version:   1.0
 
 import gamemap
@@ -31,6 +31,7 @@ class Room:
             self.loadFromRpkg(name + ".rpkg")
         else:
             self.generateRoomFromSource(name)
+
 
     def getCol(self):
         """
@@ -110,5 +111,8 @@ class Room:
         self.bg = pygame.image.fromstring(room[2], room[3], "RGB").convert()
         self.objects = room[4]
         self.doors = room[5]
+
+
+        
 
 

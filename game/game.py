@@ -1,3 +1,4 @@
+
 # -*- coding: cp1252 -*-
 #Datum :    07-14.12.16
 #Autor/en:  Kerim, Till, Lucas V.
@@ -15,14 +16,8 @@ import math
 WHITE = (255, 255, 255)
 
 '''erstelle das Fenster'''
-mapPath = "map.png"
-mymap = gamemap.createByImage(mapPath)
 
-screenWidth = mymap.getWidth()
-screenHeight = mymap.getHeight()
-screen = pygame.display.set_mode([screenWidth, screenHeight])
-pygame.key.set_repeat(1,10)
-background = pygame.image.load(mapPath).convert()
+
 
 class Game():    
     def __init__(self):
@@ -32,15 +27,26 @@ class Game():
         achtet auf Kollisionen und zeigt die Spielerpositionen
         Beendet das Spiel sobald nur noch ein Spieler am leben ist
         Parameter:      -
+        
         return values:  -
         '''
         print 'Es gibt Bugs bei den Schuessen, wenn die zu schnell fliegen, sie koennen dann z.T. durch Spieler und Waende fliegen, ohne sie zu treffen, da die Schuesse nur fuer positionen berechnet werden und die Strecke dazwischen nicht ueberprueft wird'
         self.done = False
+        
+        mapPath = "map3"
+
+        self.mymap = gamemap.createByImage(mapPath + "col.png")
+        screenWidth = self.mymap.getWidth()
+        screenHeight = self.mymap.getHeight()
+        self.screen = pygame.display.set_mode([screenWidth, screenHeight])
+        self.background = pygame.image.load(mapPath + ".png").convert()
+        pygame.key.set_repeat(1,10)
         self.allPlayers = pygame.sprite.Group()
         self.allBullets = pygame.sprite.Group()
         self.allWeapons = pygame.sprite.Group()
         self.clock = pygame.time.Clock()
         self.player1 = Player()
+        self.player1.setParent(self)
         self.bot1 = Bot()
         self.createSomeStuff()
         self.__startGame()
@@ -61,12 +67,13 @@ class Game():
             for bullet in self.allBullets:
                 self.__handleCollision(bullet)    
                 
-            screen.blit(background, [0,0])
+            self.screen.blit(self.background, [0,0])
             self.__drawAllSprites()
             pygame.display.flip()
          
             # --- Limit to 20 frames per second
             self.clock.tick(60)
+            #print self.clock.get_fps()
 
         self.__endGame()
         pygame.quit()
@@ -97,7 +104,7 @@ class Game():
         weapon4.rect.x = 150
         weapon4.rect.y = 80
         self.player1.rect.y = 440
-        self.player1.rect.x = 20
+        self.player1.rect.x = 220
         self.bot1.rect.y = 20
         self.bot1.rect.x = 25
 
@@ -112,8 +119,8 @@ class Game():
             if event.type == pygame.QUIT:
                 self.done = True
             elif event.type == pygame.KEYDOWN:
-                self.player1.update(mymap)
-                self.bot1.update(mymap)
+                self.player1.update(self.mymap)
+                self.bot1.update(self.mymap)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 bullet = self.player1.shoot(self.player1.rect.centerx, self.player1.rect.centery, event.pos)
                 if not bullet == None:
@@ -127,7 +134,7 @@ class Game():
         Parameter:      -
         return values:  -
         '''
-        self.allPlayers.update(mymap)
+        self.allPlayers.update(self.mymap)
         self.allBullets.update()
         self.allWeapons.update()
                     
@@ -138,9 +145,9 @@ class Game():
         Parameter:      -
         return values:  -
         '''
-        self.allPlayers.draw(screen)
-        self.allBullets.draw(screen)
-        self.allWeapons.draw(screen)
+        self.allPlayers.draw(self.screen)
+        self.allBullets.draw(self.screen)
+        self.allWeapons.draw(self.screen)
 
     def __eventuallyEquipWeapon(self):
         '''
@@ -168,9 +175,9 @@ class Game():
         '''
         removeBullets = []
         removePlayers = []
-        if not mymap.isRectValid(bullet.rect):
+        if not self.mymap.isRectValid(bullet.rect):
             removeBullets.append(bullet)
-        elif bullet.rect.x > mymap.getWidth() or bullet.rect.y > mymap.getHeight():
+        elif bullet.rect.x > self.mymap.getWidth() or bullet.rect.y > self.mymap.getHeight():
             removeBullets.append(bullet)
         elif bullet.rect.x < 0 or bullet.rect.y < 0:
             removeBullets.append(bullet)
@@ -254,6 +261,12 @@ class Game():
         return values:  -
         '''
         print 'das Spiel ist zuende'
+
+    def changeRoom(self, room):
+        self.mymap = room.getCol()
+        self.background = room.getBg()
+        self.player1.rect.y = 420
+        self.player1.rect.x = 220
 
 if __name__ == "__main__":
     Game()
