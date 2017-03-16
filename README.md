@@ -1,1 +1,1 @@
-# CoolesSpiel BITTE nur funktionierende, ausgetestete Sachen hochladen! :)
+# CoolesSpiel BITTE nur funktionierende, ausgetestete Sachen in den master pushen! :)
