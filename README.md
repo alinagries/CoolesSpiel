@@ -1,1 +1,1 @@
-# CoolesSpiel BITTE nur funktionierende ausgetestete Sachen hochladen ab jetzt! :)
+# CoolesSpiel BITTE nur funktionierende, ausgetestete Sachen hochladen! :)
