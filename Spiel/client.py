@@ -44,9 +44,6 @@ class Client(Thread):
                 self.parent.setPlayerlist(ast.literal_eval(data[2:]))
             elif data.startswith('d'):
                 self.parent.playerDied(data[2:])
-            elif data.startswith('r'):
-                self.parent.changeRoom(data[2:])
-                
             else:
                 print('Client recieved bad data "{0}"'.format(data))
 

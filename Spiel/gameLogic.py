@@ -100,7 +100,7 @@ class GameLogic(threading.Thread):
 
     def playerDied(self, player):
         """
-        Wird aufgerufen, wenn ein Spieler stirbt.
+        
         """
         index = self.players.index(player)
         self.players.pop(index)
@@ -109,14 +109,6 @@ class GameLogic(threading.Thread):
         self.playerConnectedCount -= 1
         
         self.queue.put("d." + str(player))
-
-    def changeRoom(self, player, room, exitPoint):
-        """
-        Wird aufgerufen, wenn ein Spieler den Raum gewechselt hat.
-        """
-        index = self.players.index(player)
-        self.playerPositions[index] =  exitPoint        
-        self.queue.put("r." + str(player) + str(room) + str(exitPoint))
         
 
 

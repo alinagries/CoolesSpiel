@@ -145,7 +145,7 @@ class Game():
             else:
                 yCoord += destination[i]
         destination = int(xCoord), int(yCoord)
-        print 'destination:', destination
+
         for bot in self.allBots:
             if bot.nick == ip:
                 bullet = bot.shot(destination)
@@ -191,8 +191,6 @@ class Game():
         for playerCoord in allPlayerCoords:
             self.moveBot(playerCoord, self.playerList[allPlayerCoords.index(playerCoord)])
 
-    #def receiveShot(self, 
-
     
     def __eventProcessing(self):
         '''
@@ -220,7 +218,7 @@ class Game():
         return values:  -
         '''
         screen.blit(background, [0,0])
-        self.allPlayers.draw(screen)
+        #self.allPlayers.draw(screen)
         self.allBots.draw(screen)
         self.allBullets.draw(screen)
         #self.allWeapons.draw(screen)
@@ -236,34 +234,32 @@ class Game():
         '''
         removeBullets = []
         removePlayers = []
-        if bullet != None:
-            bulletPos = bullet.bulletFligthPositions
-            hitPlayer = False
-
-        
-            for bulletposition in bulletPos:
-                if hitPlayer:
-                    pass
-                elif not mymap.isPositionValid(bulletposition[0], bulletposition[1]):
-                    removeBullets.append(bullet)
-                elif bulletposition[0] > mymap.getWidth() or bulletposition[1] > mymap.getHeight():
-                    removeBullets.append(bullet)
-                elif bulletposition[0] < 0 or bulletposition[1] < 0:
-                    removeBullets.append(bullet)
-                else:
-                    for player in self.allPlayers:
-                        if player.rect.collidepoint(bulletposition) and player.nick != bullet.playernick:
-                            hitPlayer = True
-##                            removeBullets.append(bullet)
-##                            #das wird nur beim Server berechnet!
-##                            player.isHit(bullet.damage)
-##                            if player.hp <= 0:
-##                                removePlayers.append(player)
+        bulletPos = bullet.bulletFligthPositions
+        hitPlayer = False
+       
+        for bulletposition in bulletPos:
+            if hitPlayer:
+                pass
+            elif not mymap.isPositionValid(bulletposition[0], bulletposition[1]):
+                removeBullets.append(bullet)
+            elif bulletposition[0] > mymap.getWidth() or bulletposition[1] > mymap.getHeight():
+                removeBullets.append(bullet)
+            elif bulletposition[0] < 0 or bulletposition[1] < 0:
+                removeBullets.append(bullet)
+            else:
+                for player in self.allBots:
+                    if player.rect.collidepoint(bulletposition) and player.nick != bullet.playernick:
+                        hitPlayer = True
+                        removeBullets.append(bullet)
+##                      #das wird nur beim Server berechnet!
+##                      player.isHit(bullet.damage)
+##                      if player.hp <= 0:
+##                      removePlayers.append(player)
                 
         for bullet in removeBullets:
             self.removeBullet(bullet)
-        for player in removePlayers:
-            self.removePlayer(player)
+##        for player in removePlayers:
+##            self.removePlayer(player)
 
     def removeBullet(self, bullet):
         '''

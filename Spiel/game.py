@@ -8,23 +8,15 @@ from bot import Bot
 from bullet import Bullet
 from weapon import Weapon
 from client import Client
+import createRoommap
 import gamemap
 import pygame
 import random
 import math
 import threading
 
-##WHITE = (255, 255, 255)
-##
-##'''erstelle das Fenster'''
 mapPath = "map.png"
 mymap = gamemap.createByImage(mapPath)
-##
-##screenWidth = mymap.getWidth()
-##screenHeight = mymap.getHeight()
-##screen = pygame.display.set_mode([screenWidth, screenHeight])
-##pygame.key.set_repeat(1,10)
-##background = pygame.image.load(mapPath).convert()
 
 class Game(threading.Thread):    
     def __init__(self, parent):
@@ -41,78 +33,31 @@ class Game(threading.Thread):
         self.parent = parent
 
         self.done = False
-        self.allPlayers = pygame.sprite.Group()
         self.allBots    = pygame.sprite.Group()
         self.allBullets = pygame.sprite.Group()
-        self.allWeapons = pygame.sprite.Group()
-
         self.playerList = []
         
+        roommap = createRoommap.createRoommap(self)
+        self.rooms = roommap.getRooms()
+        #self.rooms[0] ist room 0
+        #self.rooms[1] ist room 1
+        #....
+        
         self.clock = pygame.time.Clock()
-        
-
-    def setPlayerlist(self, x):
-        self.playerList = x
-        for botnick in self.playerList:
-            self.createBot(botnick)
-        self.start()
-        
-    def run(self):
+    
+    
+    def changeRoom(self, newRoom, newPosition, bot):
         '''
-        Private Funktion - nicht ausserhalb der Klasse benutzen!
-        startet das Spiel und achtet durchgehend, welche Spieler noch leben, bewegt die Schuesse,
-        achtet auf Kollisionen und zeigt die Spielerpoitionen
-        Beendet das Spiel sobald das Fenster geschlossen wurde
-        Parameter:      -
+        wird von room aufgerufen, ein bot hat eine Tuer betreten und geht in einen anderen Raum
+        Parameter:      newRoom, (hoffentlich ein Int, KAI FRAGEN!) Nope!, roomobjekt -.-
+                        newPosition (Tuple aus 2 INTs)
+                        bot, ein botobjekt
         return values:  -
         '''
+        bot.rect.center = newPosition
+        self.rooms[newRoom].addBot(bot)
         
-        while not self.done:
-            self.allBullets.update()
-            for bullet in self.allBullets:
-                self.__handleCollision(bullet)
-             # --- Limit to 20 frames per second
-            self.clock.tick(60)
-
-        pygame.quit()
-
-    def createBot(self, name, coord = [30,30]):
-        '''
-        bekommt eine Position eines Spielers und zeichnet diesen
-        Parameter:      coord, bsp ("034", "100")
-        return values:  -
-        '''
-        bot = Bot()
-        bot.nick = name
-        bot.rect.centerx = coord[0]
-        bot.rect.centery = coord[1]
-        self.allBots.add(bot)
-
-    def moveBot(self, newCoord, name):
-        unterstrich = False
-        xCoord = ""
-        yCoord = ""
-        for i in range(len(newCoord)):
-            if newCoord[i] == '_':
-                unterstrich = True
-            elif not unterstrich:
-                xCoord += newCoord[i]
-            else:
-                yCoord += newCoord[i]
-        coord = int(xCoord), int(yCoord)
-
-        for bot in self.allBots:
-            if bot.nick == name:
-                bot.rect.centerx = coord[0]
-                bot.rect.centery = coord[1]
-
-    def createWeapons(self):
-        '''
-        soll eine Liste mit positionen bekommen und daraus rechtecke machen, die gezeichnet werden
-        '''
-        pass
-
-
+    
     def shoot(self, destination, ip):
         '''
         gibt die Position eines Spielers
@@ -132,75 +77,47 @@ class Game(threading.Thread):
         destination = int(xCoord), int(yCoord)
         for bot in self.allBots:
             if bot.nick == ip:
+                self.rooms[bot.getRoom()].shoot(destination, ip)#nach der IP wird zwar doppelt geguckt, ist uns aber erstmal egal
                 bullet = bot.shot(destination)
                 if bullet == None:
                     print 'bullet ist in game.py == None'
                 self.allBullets.add(bullet)
                 print("Recieved a shot")
-
+    
     def updatePlayers(self, playerCoordinates):# muss nochz fuer schuesse und waffen gemacht werden
         '''
         zeichnet alle Spieler als Bots
         Parameter:      playerCoordinates, liste mit Koordinaten der Spieler als Strings bsp.: ["100_80", "27_90",...]
         return values:  -
         '''
-
         for playerCoord in playerCoordinates:
-            self.moveBot(playerCoord, self.playerList[playerCoordinates.index(playerCoord)])
-                
+            for bot in self.allBots:
+                if self.playerList[playerCoordinates.index(playerCoord)] == bot.nick:
+                    self.rooms[bot.getRoom()].updatePlayer(playerCoord)
 
-    def __handleCollision(self, bullet):
+    def setPlayerlist(self, x):
+        self.playerList = x
+        for botnick in self.playerList:
+            self.createBot(botnick)
+        self.start()
+        
+    def run(self):
         '''
         Private Funktion - nicht ausserhalb der Klasse benutzen!
-        ueberprueft ob ein Bulletobjekt in einem Mapobjekt oder einem Spieler, zieht einem Spieler Hitpoints ab
-        und entfernt die Bullet bei einer Kollision
-        Parameter:      Bulletobjekt
+        startet das Spiel und achtet durchgehend, welche Spieler noch leben, bewegt die Schuesse,
+        achtet auf Kollisionen und zeigt die Spielerpoitionen
+        Beendet das Spiel sobald das Fenster geschlossen wurde
+        Parameter:      -
         return values:  -
         '''
-        removeBullets = []
-        removePlayers = []
-        bulletPos = bullet.bulletFligthPositions
-        hitPlayer = False
+        
+        while not self.done:
+            for room in self.rooms:
+                room.update()
 
-    
-        for bulletposition in bulletPos:
-            if hitPlayer:
-                pass
-            elif not mymap.isPositionValid(bulletposition[0], bulletposition[1]):
-                removeBullets.append(bullet)
-            elif bulletposition[0] > mymap.getWidth() or bulletposition[1] > mymap.getHeight():
-                removeBullets.append(bullet)
-            elif bulletposition[0] < 0 or bulletposition[1] < 0:
-                removeBullets.append(bullet)
-            else:
-                for player in self.allBots:
-                    if player.rect.collidepoint(bulletposition) and player.nick != bullet.playernick:
-                        hitPlayer = True
-                        removeBullets.append(bullet)
-                        player.isHit(bullet.damage)
-                        if player.hp <= 0:
-                            removePlayers.append(player)
-                            self.parent.playerDied(player.nick)
-            
-        for bullet in removeBullets:
-            self.removeBullet(bullet)
-        for player in removePlayers:
-            self.removeBot(player)
+             # --- Limit to 20 frames per second
+            self.clock.tick(60)
 
-    def removeBullet(self, bullet):
-        '''
-        entfernt ein Bulletobjekt aus der Bulletgruppe
-        Parameter:      Bulletobjekt
-        return values:  -
-        '''
-        #print 'bullets:', self.allBullets.sprites()
-        self.allBullets.remove(bullet)
+        pygame.quit()
+        
 
-    def removeBot(self, player):
-        '''
-        nimmt einen Spieler aus der Playergruppe heraus
-        Parameter:      Spielerobjekt
-        return values:  -
-        '''
-        print 'player:', player.nick, 'wird aus dem Spiel entfernt'
-        self.allBots.remove(player)

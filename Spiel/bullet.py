@@ -88,7 +88,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.x = int(self.__realXPosition)
         self.rect.y = int(self.__realYPosition)
         
-    def getBulletFlightPositions(self, precision = 5): #kerim
+    def getBulletFlightPositions(self, precision = 5):
         '''
         stelt sicher, dass kein Tunneleffekt auftritt
         Parameter:      int, precision, alle soviele pixel werden die Punkte der Linien berechnet

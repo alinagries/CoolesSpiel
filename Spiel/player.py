@@ -11,12 +11,13 @@ GREEN = (0, 255, 0)
 class Player(pygame.sprite.Sprite):
     """ This class represents the Player. """
  
-    def __init__(self, nick = 'Lucas', hitPoints = 20, speed = 2):
+    def __init__(self, nick = 'Lucas', hitPoints = 20, speed = 2, room = 0):
         """ Set up the player on creation. """
         super(Player,self).__init__()
  
         self.image = pygame.Surface([20, 20])
         self.rect = self.image.get_rect()
+        self.room = room
         self.image.fill(GREEN)
         
         self.nick = nick
@@ -42,9 +43,8 @@ class Player(pygame.sprite.Sprite):
             newRect = self.rect.move(self.speed, 0)
         if gamemap.isRectValid(newRect):
             self.rect = newRect
-        #self.rect.clamp_ip(screen.get_rect())
 
-    #def shot(self, xPos, yPos, eventPos):
+
     def shot(self, eventPos):
         '''
         Wenn moeglich (hoechstens wegen der zu vielen schussversuchen pro
@@ -138,3 +138,20 @@ class Player(pygame.sprite.Sprite):
         return values:  -
         '''
         self.weapon = weapon
+        
+    def getRoom(self):
+        '''
+        Ausgabe des Raumes des Spielers
+        Parameter:      -
+        return values:  Int, Raum (0-9)
+        '''
+        return self.room
+    
+    def setRoom(self, room):
+        '''
+        Der Spieler bekommt ein Raum zugewiesen
+        Parameter:      Int, Raum (0-9)
+        return values:  -
+        '''
+        self.room = room
+        
