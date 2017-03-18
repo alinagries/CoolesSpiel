@@ -2,6 +2,7 @@
 #Datum :    07-14.12.16
 #Autor/en:  Kerim, Till, Lucas V.
 #Version:   1.0
+from random import randint
 
 from player import Player
 from bot import Bot
@@ -10,7 +11,6 @@ from weapon import Weapon
 from client import Client
 import gamemap
 import pygame
-import random
 import math
 import threading
 
@@ -106,11 +106,6 @@ class Game(threading.Thread):
                 bot.rect.centerx = coord[0]
                 bot.rect.centery = coord[1]
 
-    def createWeapons(self):
-        '''
-        soll eine Liste mit positionen bekommen und daraus rechtecke machen, die gezeichnet werden
-        '''
-        pass
 
 
     def shoot(self, destination, ip):
@@ -137,6 +132,7 @@ class Game(threading.Thread):
                     print 'bullet ist in game.py == None'
                 self.allBullets.add(bullet)
                 print("Recieved a shot")
+
 
     def updatePlayers(self, playerCoordinates):# muss nochz fuer schuesse und waffen gemacht werden
         '''

@@ -46,7 +46,8 @@ class Client(Thread):
                 self.parent.playerDied(data[2:])
             elif data.startswith('r'):
                 self.parent.changeRoom(data[2:])
-                
+            elif data.startswith('w'):
+                self.parent.setWeapons(ast.literal_eval(data[2:]))
             else:
                 print('Client recieved bad data "{0}"'.format(data))
 
@@ -59,6 +60,14 @@ class Client(Thread):
     def sendPos(self, pos):
         convertedPosition = self.convertPositionToString(pos)
         self.socket.send('/UPDATEPOS ' + convertedPosition + '\n')
+
+    def sendWeapon(self, pos):
+        print pos, "pos2"
+        print type(pos), "type"
+        convertedPosition = self.convertPositionToString(pos)
+        print convertedPosition," conPos"
+        self.socket.send('/UPDATEW ' + convertedPosition  + '\n')
+
 
     def convertPositionToString(self, position):
         '''

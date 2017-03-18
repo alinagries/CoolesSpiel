@@ -3,7 +3,12 @@
 import threading
 import Queue
 import socket
+import ast
+from random import randint
+
 import game
+from weapon import Weapon
+
 
 class GameLogic(threading.Thread):
     """
@@ -25,6 +30,8 @@ class GameLogic(threading.Thread):
         self.playerCount = playerCount
         self.playerConnectedCount = 0
         self.players = []
+        self.weaponPositions = []
+        self.possibleWeaponPositions = ["300_300", "050_050", "200_060", "100_200", "090_080", "060_090"]
         self.playerPositions = []
         self.game = game.Game(self)
 
@@ -53,13 +60,17 @@ class GameLogic(threading.Thread):
             self.playerConnectedCount += 1
             print('Player' + str(player) + 'connected, ' + str(self.playerConnectedCount) + '/' + str(self.playerCount) + ' connected')
             if self.playerCount==self.playerConnectedCount:
-                self.queue.put("Hello there. The game starts now.")
-                self.queue.put("n." + str(self.players))
-                self.game.setPlayerlist(self.players)
-                self.start()
+                self.startGame()
         else:
             print('{0} tried to connect, but there is no space for another player'.format(player))
 
+    def startGame(self):
+        self.weaponPositions.extend(self.possibleWeaponPositions[0:4])
+        self.queue.put("Hello there. The game starts now.")
+        self.queue.put("n." + str(self.players))
+        self.game.setPlayerlist(self.players)
+        self.queue.put("w."+ str(self.weaponPositions))
+        self.start()
  
     def removePlayer(self, player):
         """
@@ -98,6 +109,22 @@ class GameLogic(threading.Thread):
         if self.queue.unfinished_tasks < 15:
             self.queue.put("p." + str(self.playerPositions))
 
+
+
+    def updateWeapon(self, pos):
+
+
+        self.weaponPositions.remove(pos)
+        while 1:
+            index = randint(1,len(self.possibleWeaponPositions)-1)
+            position = self.possibleWeaponPositions[index]
+            if not position in self.weaponPositions:
+                self.weaponPositions.append(position)
+                self.queue.put("w." + str(self.weaponPositions))
+                break
+
+
+
     def playerDied(self, player):
         """
         Wird aufgerufen, wenn ein Spieler stirbt.
@@ -116,7 +143,9 @@ class GameLogic(threading.Thread):
         """
         index = self.players.index(player)
         self.playerPositions[index] =  exitPoint        
-        self.queue.put("r." + str(player) + str(room) + str(exitPoint))
+        #self.queue.put("r." + str(player) + str(room) + str(exitPoint)) punkt trennen
+
+
         
 
 
