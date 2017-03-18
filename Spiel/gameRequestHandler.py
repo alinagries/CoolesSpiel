@@ -48,6 +48,7 @@ class GameRequestHandler(SocketServer.StreamRequestHandler):
                 line = None
             if not line:
                 break
+
             line = line.strip()
             cmd = line.upper().split(" ")[0]
             args = line.split(" ")[1:]
@@ -58,6 +59,11 @@ class GameRequestHandler(SocketServer.StreamRequestHandler):
                 self.server.game.updatePlayerPosition(args[0], self.ip)
             elif cmd == "/SHOOT": #schuss: Schussrichtung Spielernamen
                 self.server.game.shoot(args[0], self.ip)
+            elif cmd == "/UPDATEW":
+                self.server.game.updateWeapon(args[0])
+            else:
+                print('Server recieved bad data "{0}"'.format(line))
+
  
 ##      OPTIONAL
 ##            if line.upper().startswith("/ALLPLAYERS"): #AlleSpieler: lobby_name??
