@@ -1,31 +1,18 @@
-# -*- coding: cp1252 -*-
-#Datum :    07-14.12.16
-#Autor/en:  Kerim, Till, Lucas V.
-#Version:   1.0
-
 from player import Player
 from bot import Bot
 from bullet import Bullet
 from weapon import Weapon
 from client import Client
+import createRoommap
 import gamemap
 import pygame
 import random
 import math
 import ast
-
-WHITE = (255, 255, 255)
-
+ 
 '''erstelle das Fenster'''
-mapPath = "map.png"
-mymap = gamemap.createByImage(mapPath)
 
-screenWidth = mymap.getWidth()
-screenHeight = mymap.getHeight()
-screen = pygame.display.set_mode([screenWidth, screenHeight])
-pygame.key.set_repeat(1,10)
-background = pygame.image.load(mapPath).convert()
-
+ 
 class Game():    
     def __init__(self):
         '''
@@ -36,10 +23,24 @@ class Game():
         Parameter:      -
         return values:  -
         '''
+        
+        self.roommap = createRoommap.createRoommap(None)
+        self.myRoom  = self.roommap.getStartRoom()
+        self.mymap   = self.myRoom.getCol()
+        #mapPath = "0.png" 
+        self.screenWidth = self.mymap.getWidth()
+        self.screenHeight = self.mymap.getHeight()
+        self.screen = pygame.display.set_mode([self.screenWidth, self.screenHeight])
+        pygame.key.set_repeat(1,10)
+        self.background = self.myRoom.getBg().convert()
+        self.rooms = self.roommap.getRooms()
+
+        
         self.c = Client(self)
         self.done = False
         self.allPlayers = pygame.sprite.Group()
         self.allBots    = pygame.sprite.Group()
+        self.drawBots   = pygame.sprite.Group()
         self.allBullets = pygame.sprite.Group()
         self.allWeapons = pygame.sprite.Group()
         self.player1 = Player()
@@ -49,18 +50,20 @@ class Game():
         self.player1.rect.y = 20
         self.allPlayers.add(self.player1)
         self.clock = pygame.time.Clock()
-        screen.blit(background, [0,0])
+        self.screen.blit(self.background, [0,0])
         self.__drawAllSprites()
         pygame.display.flip()
-        self.__startGame()
         
-
+        self.__startGame()
+         
+ 
     def setPlayerlist(self, x):
         self.playerList = x
         for botnick in self.playerList:
             self.createBot(botnick)
-        
-        
+        self.checkAllBots()
+         
+         
     def __startGame(self):
         '''
         Private Funktion - nicht ausserhalb der Klasse benutzen!
@@ -75,12 +78,14 @@ class Game():
             self.allBullets.update()
             for bullet in self.allBullets:
                 self.__handleCollision(bullet)
+            self.screen.blit(self.background, [0,0])
             self.__drawAllSprites()
-             # --- Limit to 20 frames per second
+            pygame.display.flip()
+            # --- Limit to 20 frames per second
             self.clock.tick(60)
-
+ 
         pygame.quit()
-
+ 
     def createBot(self, name, coord = [30,30]):
         '''
         bekommt eine Position eines Spielers und zeichnet diesen
@@ -92,14 +97,14 @@ class Game():
         bot.rect.centerx = coord[0]
         bot.rect.centery = coord[1]
         self.allBots.add(bot)
-
+ 
     def moveBot(self, newCoord, name):
         coord = int(newCoord[0]), int(newCoord[1])
         for bot in self.allBots:
             if bot.nick == name:
                 bot.rect.centerx = coord[0]
                 bot.rect.centery = coord[1]
-
+ 
     def __deleteAllBots(self):
         '''
         loescht alle Bots
@@ -111,23 +116,23 @@ class Game():
             removeBots.append(bot)
         for removeBot in removeBots:
             self.allBots.remove(removeBot)
-
+ 
     def createWeapons(self):
         '''
         soll eine Liste mit positionen bekommen und daraus rechtecke machen, die gezeichnet werden
         '''
         pass
-
+ 
     def playerDied(self, player):
         if player == self.player1.nick:
             print("You Died xDD")
             self.done = True
-        
+         
         for bot in self.allBots:
             if str(bot.nick) == str(player):
                 self.allBots.remove(bot)
                 self.playerList.remove(ast.literal_eval(player))
-
+ 
     def shoot(self, destination, ip):
         '''
         gibt die Position eines Spielers
@@ -145,12 +150,12 @@ class Game():
             else:
                 yCoord += destination[i]
         destination = int(xCoord), int(yCoord)
-
+ 
         for bot in self.allBots:
-            if bot.nick == ip:
+            if bot.nick == ip and bot.room == self.player1.room:
                 bullet = bot.shot(destination)
                 self.allBullets.add(bullet)
-
+ 
     def convertStringsToPositions(self, listWithStrings):
         '''
         bekommt eine Liste mit den Positionen der Spieler als String und wandelt diese um
@@ -178,20 +183,61 @@ class Game():
                             unterstrich = True
             listWithPositions.append((int(xCoord), int(yCoord)))
         return listWithPositions
-
+ 
     def updatePlayers(self, playerCoordinates):# muss nochz fuer schuesse und waffen gemacht werden
         '''
         zeichnet alle Spieler als Bots
         Parameter:      playerCoordinates, liste mit Koordinaten der Spieler als Strings bsp.: ["100_80", "27_90",...]
         return values:  -
         '''
-
+ 
         allPlayerCoords = self.convertStringsToPositions(playerCoordinates)
-       #print 'allPlayerCoords:', allPlayerCoords
         for playerCoord in allPlayerCoords:
             self.moveBot(playerCoord, self.playerList[allPlayerCoords.index(playerCoord)])
 
+
+    def changeRoom(self, data):
+        print 'changeRoom'
+        nick = data[0]
+        newRoom = data[1]
+        newPosition = self.convertStringsToPositions([data[2]])
+        newPos = newPosition[0]
+        
+        for bot in self.allBots:
+            if str(self.player1.nick) == nick:
+                self.player1.setRoom(newRoom)
+                self.player1.rect.center = newPos
+                self.changeBackround(newRoom)
+            if str(bot.nick) == nick:
+                bot.room = newRoom
+        self.checkAllBots()
+
+    def checkAllBots(self):
+        self.drawBots.empty()
+        for bot in self.allBots:
+            if bot.room == self.player1.room:
+                self.drawBots.add(bot)
+                
+        
+                
+    def changeBackround(self, newRoom):
+        self.myRoom  = self.rooms[int(newRoom)]
+        self.mymap   = self.myRoom.col
+
+        mapPath = newRoom + ".png" 
+##
+##        self.screen = pygame.display.set_mode([self.mymap.getWidth(), self.mymap.getWidth()])
+##        #pygame.key.set_repeat(1,10)
+##        self.background = pygame.image.load(mapPath).convert()
+##
+
+        self.background = self.myRoom.getBg().convert()
+        #self.allWeapons.empty()
+        #self.allDoors.empty()
+        self.allBullets.empty()
+        print 'nach changeRoom'
     
+     
     def __eventProcessing(self):
         '''
         fuehrt bei einem event die entsprechende Aktion aus
@@ -203,13 +249,13 @@ class Game():
             if event.type == pygame.QUIT:
                 self.done = True
             elif event.type == pygame.KEYDOWN:
-                self.player1.update(mymap)
+                self.player1.update(self.mymap)
                 self.sendPos((self.player1.rect.centerx, self.player1.rect.centery))
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 bullet = self.player1.shot(event.pos)
                 if not bullet == None:
                     self.sendShot(event.pos)
-                
+                 
     def __drawAllSprites(self):
         '''
         Private Funktion - nicht ausserhalb der Klasse benutzen!
@@ -217,13 +263,11 @@ class Game():
         Parameter:      -      
         return values:  -
         '''
-        screen.blit(background, [0,0])
-        #self.allPlayers.draw(screen)
-        self.allBots.draw(screen)
-        self.allBullets.draw(screen)
-        #self.allWeapons.draw(screen)
-        pygame.display.flip()
-
+        #self.allPlayers.draw(self.screen)
+        self.drawBots.draw(self.screen)
+        self.allBullets.draw(self.screen)
+        #self.allWeapons.draw(self.screen)
+ 
     def __handleCollision(self, bullet):
         '''
         Private Funktion - nicht ausserhalb der Klasse benutzen!
@@ -236,13 +280,13 @@ class Game():
         removePlayers = []
         bulletPos = bullet.bulletFligthPositions
         hitPlayer = False
-       
+        
         for bulletposition in bulletPos:
             if hitPlayer:
                 pass
-            elif not mymap.isPositionValid(bulletposition[0], bulletposition[1]):
+            elif not self.mymap.isPositionValid(bulletposition[0], bulletposition[1]):
                 removeBullets.append(bullet)
-            elif bulletposition[0] > mymap.getWidth() or bulletposition[1] > mymap.getHeight():
+            elif bulletposition[0] > self.mymap.getWidth() or bulletposition[1] > self.mymap.getHeight():
                 removeBullets.append(bullet)
             elif bulletposition[0] < 0 or bulletposition[1] < 0:
                 removeBullets.append(bullet)
@@ -255,12 +299,12 @@ class Game():
 ##                      player.isHit(bullet.damage)
 ##                      if player.hp <= 0:
 ##                      removePlayers.append(player)
-                
+                 
         for bullet in removeBullets:
             self.removeBullet(bullet)
 ##        for player in removePlayers:
 ##            self.removePlayer(player)
-
+ 
     def removeBullet(self, bullet):
         '''
         entfernt ein Bulletobjekt aus der Bulletgruppe
@@ -269,7 +313,7 @@ class Game():
         '''
         #print 'bullets:', self.allBullets.sprites()
         self.allBullets.remove(bullet)
-
+ 
     def removePlayer(self, player):
         '''
         nimmt einen Spieler aus der Playergruppe heraus
@@ -278,7 +322,7 @@ class Game():
         '''
         print 'player:', player.nick, 'wird aus dem Spiel entfernt'
         self.allPlayers.remove(player)
-        
+         
     def sendPos(self, position):
         '''
         sendet ueber den Client die X und Y Position des Spielers an den Server
@@ -286,7 +330,7 @@ class Game():
         return values:  -
         '''
         self.c.sendPos(position)
-
+ 
     def sendShot(self, eventPosition):
         '''
         sendet ueber den Client die Position und das Ziel des Schusses des Spielers an den Server
@@ -295,6 +339,6 @@ class Game():
         return values:  -
         '''
         self.c.sendShot(eventPosition)
-                
+                 
 if __name__ == "__main__":
     Game()

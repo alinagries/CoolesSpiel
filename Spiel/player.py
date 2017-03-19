@@ -35,15 +35,23 @@ class Player(pygame.sprite.Sprite):
         newRect = self.rect
         if keys[pygame.K_w]:
             newRect = self.rect.move(0, -self.speed)
+            if gamemap.isRectValid(newRect):
+                self.rect = newRect
         if keys[pygame.K_s]:
             newRect = self.rect.move(0, self.speed)
+            if gamemap.isRectValid(newRect):
+                self.rect = newRect
         if keys[pygame.K_a]:
             newRect = self.rect.move(-self.speed, 0)
+            if gamemap.isRectValid(newRect):
+                self.rect = newRect
         if keys[pygame.K_d]:
             newRect = self.rect.move(self.speed, 0)
-        if gamemap.isRectValid(newRect):
-            self.rect = newRect
-
+            if gamemap.isRectValid(newRect):
+                self.rect = newRect
+        if keys[pygame.K_x]:
+            print self.rect.center, self.room
+                
 
     def shot(self, eventPos):
         '''

@@ -3,7 +3,7 @@ from gameRequestHandler import GameRequestHandler
 from socket import *
 
 def start(port = 5000):
-    server = MyGameServer(('localhost',port),GameRequestHandler, 1)
+    server = MyGameServer(('localhost',port),GameRequestHandler, 2)
     try:
         print "Server started, waiting for connections."
         server.serve_forever()

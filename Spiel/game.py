@@ -15,8 +15,6 @@ import random
 import math
 import threading
 
-mapPath = "map.png"
-mymap = gamemap.createByImage(mapPath)
 
 class Game(threading.Thread):    
     def __init__(self, parent):
@@ -35,48 +33,54 @@ class Game(threading.Thread):
         self.done = False
         self.allBots    = pygame.sprite.Group()
         self.allBullets = pygame.sprite.Group()
-        self.playerList = []
-        
+        self.playerList = [] #liste mit IPs
+        self.allPlayers = [] #tuple mit IPs und rauemen
         roommap = createRoommap.createRoommap(self)
         self.rooms = roommap.getRooms()
+
         #self.rooms[0] ist room 0
         #self.rooms[1] ist room 1
         #....
-        self.createSomeStuff()
+        
         self.clock = pygame.time.Clock()
 
-    def createSomeStuff(self):
-        '''erstellt ein paar Spieler und Waffen und plaziert diese'''
-        # code für roommap
-##        for equippable in self.room.getEquippables():
-##            if isinstance(equippable, Weapon):
-##                self.allWeapons.add(equippable)
-##                # print self.allWeapons.sprites()
-
-        for door in self.room.getDoors():
-            self.allDoors.add(door)
-            print door
-            print str(door.rect.x) + ";" + str(door.rect.y)
-    
-    
-    def changeRoom(self, roomName, newPosition, bot):
+    def showDoors(self, doorPositions):
         '''
-        wird von room aufgerufen, ein bot hat eine Tuer betreten und geht in einen anderen Raum
+        wird von room aufgerufen, ein bot hat eine Tur betreten und geht in einen anderen Raum
         Parameter:      RoomName, (Int, 0-9,)
                         newPosition (Tuple aus 2 INTs)
                         bot, ein botobjekt
         return values:  -
         '''
-        bot.rect.center = newPosition
-        bot.room = roomName
-        self.rooms[roomName].addBot(bot)
-
-    def createBot(self, name, coord = [30,30], room = 0):
+        self.parent.showDoors(doorPositions)
+        
+    
+    def changeRoom(self, roomName, newPosition, bot):
+        '''
+        wird von room aufgerufen, ein bot hat eine Tur betreten und geht in einen anderen Raum
+        Parameter:      RoomName, (Int, 0-9,)
+                        newPosition (Tuple aus 2 INTs)
+                        bot, ein botobjekt
+        return values:  -
+        '''
+        #print 'playerPos:', bot.rect.center
+        bot.rect.centerx = newPosition[0]
+        bot.rect.centery = newPosition[1]
+        bot.setRoom(roomName)
+        position = str(newPosition[0]) + "_" + str(newPosition[1])
+        for i in range(len(self.allPlayers)):
+            if bot.nick == self.allPlayers[i][0]:
+                self.allPlayers[i] = (bot.nick, int(roomName))
+        self.rooms[int(roomName)].addBot(bot)
+        self.parent.changeRoom(bot.nick, roomName, position)
+        
+    def createBot(self, name, room = 0, coord = [30,30]):
         '''
         bekommt eine Position eines Spielers und zeichnet diesen
         Parameter:      coord, bsp ("034", "100")
         return values:  -
         '''
+        self.allPlayers.append((name, room))
         self.rooms[room].createBot(name)
         
     
@@ -89,6 +93,7 @@ class Game(threading.Thread):
         unterstrich = False
         xCoord = ""
         yCoord = ""
+        
         for i in range(len(destination)):
             if destination[i] == '_':
                 unterstrich = True
@@ -97,14 +102,11 @@ class Game(threading.Thread):
             else:
                 yCoord += destination[i]
         destination = int(xCoord), int(yCoord)
-        for bot in self.allBots:
-            if bot.nick == ip:
-                self.rooms[bot.getRoom()].shoot(destination, ip)#nach der IP wird zwar doppelt geguckt, ist uns aber erstmal egal
-                bullet = bot.shot(destination)
-                if bullet == None:
-                    print 'bullet ist in game.py == None'
-                self.allBullets.add(bullet)
-                print("Recieved a shot")
+
+        
+        for ipAndRoom in self.allPlayers:
+            if ip == ipAndRoom[0]:#[(IP, "0"), (IP, "1"),..]
+                self.rooms[ipAndRoom[1]].shoot(destination, ip)#nach der IP wird zwar doppelt geguckt, ist uns aber erstmal egal
     
     def updatePlayers(self, playerCoordinates):# muss nochz fuer schuesse und waffen gemacht werden
         '''
@@ -113,9 +115,10 @@ class Game(threading.Thread):
         return values:  -
         '''
         for playerCoord in playerCoordinates:
-            for bot in self.allBots:
-                if self.playerList[playerCoordinates.index(playerCoord)] == bot.nick:
-                    self.rooms[bot.getRoom()].updatePlayer(playerCoord)
+            for botName in self.allPlayers:
+                if self.playerList[playerCoordinates.index(playerCoord)] == botName[0]:
+                    #print 'playerCoord:', playerCoord, 'room:', botName[1]
+                    self.rooms[botName[1]].updatePlayer(playerCoord, botName[0])
 
     def setPlayerlist(self, x):
         self.playerList = x

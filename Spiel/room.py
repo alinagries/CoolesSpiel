@@ -24,7 +24,7 @@ class Room:
     Klasse die einzelne Räume und ihre Attribute, sowie Funktionen zum generieren, laden und speichern bereitstellt.
 
     """
-    def __init__(self, name):
+    def __init__(self, name, parent):
         """
         Initialisierung eines Raums
 
@@ -33,24 +33,28 @@ class Room:
         """
         
         self.name = name
+        self.parent = parent
         self.col = gamemap.GameMap()
         self.bg = pygame.Surface
         self.doors = []
         self.equippables = []
 
-        print 'room __Init__ wird aufgerufen!'
-
+        
         if os.path.exists(name + ".rpkg"):
             self.loadFromRpkg(name + ".rpkg")
         else:
             self.generateRoomFromSource(name)
-
+        
         self.allBots    = pygame.sprite.Group()
         self.allBullets = pygame.sprite.Group()
+        self.allDoors   = pygame.sprite.Group()
         self.playerList = []#darf hier sein
+
+        self.createObjects()
         
     def addBot(self, bot):
         self.allBots.add(bot)
+        print "bot wird hinzugefuegt an position " , bot.rect.center
     
     def createBot(self, name, coord = [30,30]):
         '''
@@ -64,6 +68,7 @@ class Room:
         bot.rect.centery = coord[1]
         bot.room = self.name
         self.allBots.add(bot)
+        print "bot wird erstellt", bot.nick
 
     def moveBot(self, newCoord, name):
         unterstrich = False
@@ -81,6 +86,12 @@ class Room:
         for bot in self.allBots:
             if bot.nick == name:
                 bot.rect.center = coord
+                
+    def createObjects(self):
+        for door in self.doors:
+            self.allDoors.add(door)
+            #print "doorPos:", door.rect.center
+            #print str(door.rect.x) + ";" + str(door.rect.y)
 
     def shoot(self, destination, ip):
         '''
@@ -97,15 +108,22 @@ class Room:
                 self.allBullets.add(bullet)
                 print("Recieved a shot")
 
-    def updatePlayers(self, playerCoordinates):# muss nochz fuer schuesse und waffen gemacht werden
+    def updatePlayer(self, newCoord, playerName):# muss nochz fuer schuesse und waffen gemacht werden
         '''
         zeichnet alle Spieler als Bots
         Parameter:      playerCoordinates, liste mit Koordinaten der Spieler als Strings bsp.: ["100_80", "27_90",...]
         return values:  -
         '''
-        for playerCoord in playerCoordinates:
-            self.moveBot(playerCoord, self.playerList[playerCoordinates.index(playerCoord)])
-                
+        for bot in self.allBots:
+            if bot.nick == playerName:
+                self.moveBot(newCoord, playerName)
+
+##    
+##        for playerCoord in playerCoordinates:
+##            self.moveBot(playerCoord, self.playerList[playerCoordinates.index(playerCoord)])
+##        for bot in self.allBots:
+##            print bot.rect.center
+##                
 
     def __handleCollision(self, bullet):
         '''
@@ -120,26 +138,26 @@ class Room:
         bulletPos = bullet.bulletFligthPositions
         hitPlayer = False
 
-    
+
         for bulletposition in bulletPos:
             if hitPlayer:
                 pass
-            elif not mymap.isPositionValid(bulletposition[0], bulletposition[1]):
+            elif not self.col.isPositionValid(bulletposition[0], bulletposition[1]):
                 removeBullets.append(bullet)
-            elif bulletposition[0] > mymap.getWidth() or bulletposition[1] > mymap.getHeight():
+            elif bulletposition[0] > self.col.getWidth() or bulletposition[1] > self.col.getHeight():
                 removeBullets.append(bullet)
             elif bulletposition[0] < 0 or bulletposition[1] < 0:
                 removeBullets.append(bullet)
             else:
                 for player in self.allBots:
                     if player.rect.collidepoint(bulletposition) and player.nick != bullet.playernick:
-                        hitPlayer = True
-                        removeBullets.append(bullet)
-                        player.isHit(bullet.damage)
-                        if player.hp <= 0:
-                            removePlayers.append(player)
-                            self.playerDied(player.nick)
-            
+                            hitPlayer = True
+                            removeBullets.append(bullet)
+                            player.isHit(bullet.damage)
+                            if player.hp <= 0:
+                                removePlayers.append(player)
+                                self.parent.parent.playerDied(player.nick)
+                
         for bullet in removeBullets:
             self.removeBullet(bullet)
         for player in removePlayers:
@@ -160,7 +178,7 @@ class Room:
         Parameter:      Spielerobjekt
         return values:  -
         '''
-        print 'player:', bot.nick, 'wird aus dem Spiel entfernt'
+        print 'player:', bot.nick, 'wird aus dem Raum entfernt'
         self.allBots.remove(bot)
         
     
@@ -169,6 +187,8 @@ class Room:
         self.__eventuallyEnterDoor()
         for bullet in self.allBullets:
             self.__handleCollision(bullet)
+        #for door in self.getDoors():
+            #print 'Door at:', door.rect.center
             
     def __eventuallyEnterDoor(self):
         '''
@@ -180,10 +200,10 @@ class Room:
         for bot in self.allBots:
             for door in self.getDoors():
                 if bot.rect.colliderect(door.rect):
-                    print 'door:', door
+                    print 'beruehrt Tuer'
                     room = door.getRoom()
-                    self.changeRoom(room.getName(), door.getExitpoint(), bot)
-                    self.removeBot()
+                    self.parent.changeRoom(room.getName(), door.getExitpoint(), bot)
+                    self.removeBot(bot)
                     
     def getName(self):
         return self.name
@@ -263,8 +283,8 @@ class Room:
         """
         self.name = name
         self.col = gamemap.createByImage(name + "col.png")
-        print self.col
-        #self.bg = pygame.image.load(name + ".png").convert()
+        print "self.col:", self.col
+        self.bg = pygame.image.load(name + ".png")
         self.saveToRpkg()
 
     def saveToRpkg(self):
@@ -274,10 +294,9 @@ class Room:
         Parameter:      -
         Rückgabewerte:  -
         """
-        print 'die fkt saveToRpkg wird aufgerufen!'
-        #room = (self.name, self.col, pygame.image.tostring(self.bg, "RGB"), self.bg.get_size(), self.equippables, self.doors)
-        room = (self.name, self.col, "placeholder", "placeholder", self.equippables, self.doors)
-        print "room nach save", room
+        print type(self.bg)
+        room = (self.name, self.col, pygame.image.tostring(self.bg, "RGB"), self.bg.get_size(), self.equippables, self.doors)
+        #room = (self.name, self.col, "placeholder", "placeholder", self.equippables, self.doors)
         try:
             Pickle.dump(room, open(self.name + ".rpkg", "wb"), 2)
         except Exception as e:
@@ -297,7 +316,7 @@ class Room:
             print e
         self.name = room[0]
         self.col = room[1]
-        #self.bg = pygame.image.fromstring(room[2], room[3], "RGB").convert()
+        self.bg = pygame.image.fromstring(room[2], room[3], "RGB")
         self.equippables = room[4]
         self.doors = room[5]
         

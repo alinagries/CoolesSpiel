@@ -16,21 +16,7 @@ class Bot(Player):
         '''
         Player.__init__(self, nick)
         self.image.fill(RED)
-##        self.weapon.firerate = 0
-##
-##    def equipWeapon(self, weapon):
-##        self.weapon = weapon
-##        self.weapon.firerate = 0
-##
-##    def secondaryWeapon(self):
-##        '''
-##        Der Spieler bekommt das Objekt der Standartwaffe zugewiesen
-##        Parameter:      -
-##        return values:  -
-##        '''
-##        self.weapon = Weapon()
-##        self.weapon.firerate = 0
-##        
+        
     def shot(self, eventPos):
         '''
         Wenn moeglich (hoechstens wegen der zu vielen schussversuchen pro
@@ -65,3 +51,4 @@ class Bot(Player):
         return values:  -
         '''
         pass
+            

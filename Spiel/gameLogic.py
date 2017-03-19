@@ -109,6 +109,15 @@ class GameLogic(threading.Thread):
         self.playerConnectedCount -= 1
         
         self.queue.put("d." + str(player))
+
+    def changeRoom(self, player, room, exitPoint):
+        """
+        Wird aufgerufen, wenn ein Spieler den Raum gewechselt hat.
+        """
+        print 'changeRoom, gameLogic'
+        index = self.players.index(player)
+        self.playerPositions[index] =  exitPoint
+        self.queue.put("r." + str(player) + "|"  + str(room) + "|"  + str(exitPoint))
         
 
 
