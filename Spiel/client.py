@@ -20,7 +20,7 @@ class Client(Thread):
         self.sock.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, mreq)
 
 
-        self.SERVER_PORT = 5000
+        self.SERVER_PORT = 5010
         self.SERVER_HOST = "localhost"
         self.socket = socket( AF_INET, SOCK_STREAM)
         self.socket.connect( (self.SERVER_HOST, self.SERVER_PORT) )
