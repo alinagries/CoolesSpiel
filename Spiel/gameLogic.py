@@ -12,7 +12,7 @@ from weapon import Weapon
 
 class GameLogic(threading.Thread):
     """
-    Klasse zur Ausführung eines Spiels
+    Klasse zur AusfÃ¼hrung eines Spiels
     """
 
     def __init__(self, playerCount):
@@ -20,7 +20,7 @@ class GameLogic(threading.Thread):
         Initialisierung eines GameLogic
          
         Parameter:      int die maximale Spieleranzahl
-        Rückgabewerte:  -
+        RÃ¼ckgabewerte:  -
         """
         threading.Thread.__init__(self)
         self.deamon = True
@@ -31,7 +31,7 @@ class GameLogic(threading.Thread):
         self.playerConnectedCount = 0
         self.players = []
         self.weaponPositions = []
-        self.possibleWeaponPositions = ["300_300", "050_050", "200_060", "100_200", "090_080", "060_090"]
+        self.possibleWeaponPositions = ["300_300", "050_050", "200_060", "100_200", "050_110", "060_090"]
         self.playerPositions = []
         self.game = game.Game(self)
 
@@ -49,10 +49,10 @@ class GameLogic(threading.Thread):
      
     def addPlayer(self, player):
         """
-        Hinzufügen eines Spielers, falls die maximale Spieleranzahl noch nicht erreicht wurde
+        HinzufÃ¼gen eines Spielers, falls die maximale Spieleranzahl noch nicht erreicht wurde
          
-        Parameter:      object servereigene Spielerrepreäsentation
-        Rückgabewerte:  -
+        Parameter:      object servereigene SpielerrepreÃ¤sentation
+        RÃ¼ckgabewerte:  -
         """
         if self.playerCount>self.playerConnectedCount:
             self.players.append(player)
@@ -74,10 +74,10 @@ class GameLogic(threading.Thread):
  
     def removePlayer(self, player):
         """
-        Entfernen eines Spielers, falls er zuvor hinzugefügt wurde
+        Entfernen eines Spielers, falls er zuvor hinzugefÃ¼gt wurde
          
-        Parameter:      object servereigene Spielerrepreäsentation
-        Rückgabewerte:  -
+        Parameter:      object servereigene SpielerrepreÃ¤sentation
+        RÃ¼ckgabewerte:  -
         """
         try:
             self._players.remove(player)
@@ -88,8 +88,8 @@ class GameLogic(threading.Thread):
         Registrieren eines Schusses
          
         Parameter:      string Schussposition
-                        object servereigene Spielerrepreäsentation
-        Rückgabewerte:  -
+                        object servereigene SpielerrepreÃ¤sentation
+        RÃ¼ckgabewerte:  -
         """
         shot = str(clickedPos) + ";" + str(player)
         self.game.shoot(clickedPos, player)
@@ -100,8 +100,8 @@ class GameLogic(threading.Thread):
         Updaten einer Position
          
         Parameter:      string Spielerposition
-                        object servereigene Spielerrepreäsentation
-        Rückgabewerte:  -
+                        object servereigene SpielerrepreÃ¤sentation
+        RÃ¼ckgabewerte:  -
         """
         index = self.players.index(player)
         self.playerPositions[index] = newPosition
@@ -154,7 +154,7 @@ class GameLogic(threading.Thread):
 ##        Starten des Spiels
 ##         
 ##        Parameter:      -
-##        Rückgabewerte:  -
+##        RÃ¼ckgabewerte:  -
 ##        """
 ##        #for player in self.players:
 ##          #  self.sendToPlayer(player, 'GAMESTARTING')
@@ -168,7 +168,7 @@ class GameLogic(threading.Thread):
 ##        Stoppen des Spiels
 ##         
 ##        Parameter:      -
-##        Rückgabewerte:  -
+##        RÃ¼ckgabewerte:  -
 ##        """
 ##        self._gameStarted = False
         
