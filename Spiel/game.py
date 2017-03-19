@@ -42,20 +42,42 @@ class Game(threading.Thread):
         #self.rooms[0] ist room 0
         #self.rooms[1] ist room 1
         #....
-        
+        self.createSomeStuff()
         self.clock = pygame.time.Clock()
+
+    def createSomeStuff(self):
+        '''erstellt ein paar Spieler und Waffen und plaziert diese'''
+        # code für roommap
+##        for equippable in self.room.getEquippables():
+##            if isinstance(equippable, Weapon):
+##                self.allWeapons.add(equippable)
+##                # print self.allWeapons.sprites()
+
+        for door in self.room.getDoors():
+            self.allDoors.add(door)
+            print door
+            print str(door.rect.x) + ";" + str(door.rect.y)
     
     
-    def changeRoom(self, newRoom, newPosition, bot):
+    def changeRoom(self, roomName, newPosition, bot):
         '''
         wird von room aufgerufen, ein bot hat eine Tuer betreten und geht in einen anderen Raum
-        Parameter:      newRoom, (hoffentlich ein Int, KAI FRAGEN!) Nope!, roomobjekt -.-
+        Parameter:      RoomName, (Int, 0-9,)
                         newPosition (Tuple aus 2 INTs)
                         bot, ein botobjekt
         return values:  -
         '''
         bot.rect.center = newPosition
-        self.rooms[newRoom].addBot(bot)
+        bot.room = roomName
+        self.rooms[roomName].addBot(bot)
+
+    def createBot(self, name, coord = [30,30], room = 0):
+        '''
+        bekommt eine Position eines Spielers und zeichnet diesen
+        Parameter:      coord, bsp ("034", "100")
+        return values:  -
+        '''
+        self.rooms[room].createBot(name)
         
     
     def shoot(self, destination, ip):
@@ -112,6 +134,9 @@ class Game(threading.Thread):
         '''
         
         while not self.done:
+            if len(self.allBots)==1:
+                print 'erstelle das siegesfenster!'
+                pass
             for room in self.rooms:
                 room.update()
 
