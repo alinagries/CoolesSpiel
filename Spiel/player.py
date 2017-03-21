@@ -51,7 +51,6 @@ class Player(pygame.sprite.Sprite):
                 self.rect = newRect
         if keys[pygame.K_x]:
             print self.rect.center, self.room
-        print 'something'
 
     #def shot(self, xPos, yPos, eventPos):
     def shot(self, eventPos):
