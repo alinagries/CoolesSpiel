@@ -248,14 +248,19 @@ class Game():
 
     def changeRoom(self, data):
         nick = data[0]
+        print type(nick), "TYPE!!"
         newRoom = data[1]
         newPosition = self.convertStringsToPositions([data[2]])
         newPos = newPosition[0]
+        print 'NEW POS', newPos
         
         for bot in self.allBots:
-            if str(self.player1.nick) == nick:
+            if str(self.player1.nick) == str(nick):
+                print "!!!!!!!!!!!!!!!!???????????????????"
                 self.player1.setRoom(newRoom)
                 self.player1.rect.center = newPos
+                print self.player1.rect.center, "PLAYERRECT!!!"
+                self.__drawAllSprites()
                 self.changeBackround(newRoom)
             if str(bot.nick) == nick:
                 bot.room = newRoom
