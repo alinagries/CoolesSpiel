@@ -11,7 +11,7 @@ GREEN = (0, 255, 0)
 class Player(pygame.sprite.Sprite):
     """ This class represents the Player. """
  
-    def __init__(self, nick = 'Lucas', hitPoints = 20, speed = 2):
+    def __init__(self, nick = 'Lucas', hitPoints = 20, speed = 2, room = 0):
         """ Set up the player on creation. """
         super(Player,self).__init__()
  
@@ -22,6 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.nick = nick
         self.hp = hitPoints
         self.speed = speed
+        self.room = room
         self.secondaryWeapon()
  
     def update(self, gamemap):
@@ -34,15 +35,22 @@ class Player(pygame.sprite.Sprite):
         newRect = self.rect
         if keys[pygame.K_w]:
             newRect = self.rect.move(0, -self.speed)
+            if gamemap.isRectValid(newRect):
+                self.rect = newRect
         if keys[pygame.K_s]:
             newRect = self.rect.move(0, self.speed)
+            if gamemap.isRectValid(newRect):
+                self.rect = newRect
         if keys[pygame.K_a]:
             newRect = self.rect.move(-self.speed, 0)
+            if gamemap.isRectValid(newRect):
+                self.rect = newRect
         if keys[pygame.K_d]:
             newRect = self.rect.move(self.speed, 0)
-        if gamemap.isRectValid(newRect):
-            self.rect = newRect
-        #self.rect.clamp_ip(screen.get_rect())
+            if gamemap.isRectValid(newRect):
+                self.rect = newRect
+        if keys[pygame.K_x]:
+            print self.rect.center, self.room
 
     #def shot(self, xPos, yPos, eventPos):
     def shot(self, eventPos):
@@ -138,3 +146,19 @@ class Player(pygame.sprite.Sprite):
         return values:  -
         '''
         self.weapon = weapon
+
+    def getRoom(self):
+        '''
+        Ausgabe des Raumes des Spielers
+        Parameter:      -
+        return values:  Int, Raum (0-9)
+        '''
+        return self.room
+    
+    def setRoom(self, room):
+        '''
+        Der Spieler bekommt ein Raum zugewiesen
+        Parameter:      Int, Raum (0-9)
+        return values:  -
+        '''
+        self.room = room

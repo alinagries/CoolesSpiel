@@ -3,7 +3,6 @@ from gameServer import *
 from gameRequestHandler import GameRequestHandler
 from socket import *
 args = sys.argv
-print args, "hallo args"
 def start(port = 5000):
     server = MyGameServer(('0.0.0.0',port),GameRequestHandler, int(args[1]))
     try:

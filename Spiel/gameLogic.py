@@ -5,10 +5,8 @@ import Queue
 import socket
 import ast
 from random import randint
-
 import game
 from weapon import Weapon
-
 
 class GameLogic(threading.Thread):
     """
@@ -31,7 +29,7 @@ class GameLogic(threading.Thread):
         self.playerConnectedCount = 0
         self.players = []
         self.weaponPositions = []
-        self.possibleWeaponPositions = ["300_300", "050_050", "200_060", "100_200", "050_110", "060_090"]
+        self.possibleWeaponPositions = ["140_110", "490_110", "420_300", "220_300", "060_300", "600_300", "420_550", "220_550", "090_490", "550_480", "600_170", "600_040", "350_050", "290_040", "050_180"]
         self.playerPositions = []
         self.game = game.Game(self)
 
@@ -69,7 +67,8 @@ class GameLogic(threading.Thread):
         self.queue.put("Hello there. The game starts now.")
         self.queue.put("n." + str(self.players))
         self.game.setPlayerlist(self.players)
-        self.queue.put("w."+ str(self.weaponPositions))
+        self.game.setRandomWeapons(self.weaponPositions)
+
         self.start()
  
     def removePlayer(self, player):
@@ -111,19 +110,37 @@ class GameLogic(threading.Thread):
 
 
 
-    def updateWeapon(self, pos):
+    def updateWeapon(self, pos, playerName, room):
+        print 'updateWeapon'
+        newPos = self.createNewPos()
+        self.sendWeapon(newPos, pos, playerName, room)
+        
+    def sendWeapon(self, newPos, oldPos, playerName, room):
+        print 'sendWeapon'
+        #der raum kommt nocht in die msg
+        msg = str((str(oldPos[0]), str(oldPos[1]), newPos, str(playerName)))
+        self.queue.put("w." + msg )
+        print 'msg'
+        oldPosition = self.convertPositionToString(oldPos)
+        self.removeWeapon(oldPosition)
+        self.game.changeWeapon(oldPos, newPos, room)
+        self.weaponPositions.append(newPos)
 
+    def sendStartWeapon(self, position, weaponParameter):
+        msg = str((str(position[0]), str(position[1]), str(weaponParameter[0]), str(weaponParameter[1]), str(weaponParameter[2]), str(weaponParameter[3])))
+        room = weaponParameter#wird evtl noch eingebracht... mal sehen
+        self.queue.put("v." + msg)
+        
+    def removeWeapon(self, oldPos):
+        self.weaponPositions.remove(oldPos)
 
-        self.weaponPositions.remove(pos)
-        while 1:
+    def createNewPos(self):
+        index = randint(1,len(self.possibleWeaponPositions)-1)
+        position = self.possibleWeaponPositions[index]
+        while position in self.weaponPositions:
             index = randint(1,len(self.possibleWeaponPositions)-1)
             position = self.possibleWeaponPositions[index]
-            if not position in self.weaponPositions:
-                self.weaponPositions.append(position)
-                self.queue.put("w." + str(self.weaponPositions))
-                break
-
-
+        return position
 
     def playerDied(self, player):
         """
@@ -141,36 +158,21 @@ class GameLogic(threading.Thread):
         """
         Wird aufgerufen, wenn ein Spieler den Raum gewechselt hat.
         """
+        print 'changeRoom, gameLogic'
+        #alle doors und weapons schicken und ip
         index = self.players.index(player)
-        self.playerPositions[index] =  exitPoint        
-        #self.queue.put("r." + str(player) + str(room) + str(exitPoint)) punkt trennen
-
+        self.playerPositions[index] =  exitPoint
+        self.queue.put("r." + str(player) + "|"  + str(room) + "|"  + str(exitPoint))
 
         
-
-
-##    def startGame(self):
-##        """
-##        Starten des Spiels
-##         
-##        Parameter:      -
-##        Rückgabewerte:  -
-##        """
-##        #for player in self.players:
-##          #  self.sendToPlayer(player, 'GAMESTARTING')
-##        self._gameStarted = True
-##        t = threading.Thread(target = self.onTick)
-##        t.daemon = True
-##        t.start()
-## 
-##    def stopGame(self):
-##        """
-##        Stoppen des Spiels
-##         
-##        Parameter:      -
-##        Rückgabewerte:  -
-##        """
-##        self._gameStarted = False
-        
-
-
+    def convertPositionToString(self, position):
+        '''
+        bekommt eine Position eines Spieler und wandelt diese um
+        bsp.: (12,7) -> "012_007"
+        Parameter:      position
+        return values:  convertedPosition, 7 Zeichen langer String der Position
+        '''
+        xPos = position[0]
+        yPos = position[1]
+        convertedPosition = str(xPos).zfill(3) + '_' + str(yPos).zfill(3)
+        return convertedPosition

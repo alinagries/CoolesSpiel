@@ -92,6 +92,15 @@ class ShaderOverlay():
             return False
 
     def raycast(self, pos, dest, rect, steps):
+        """
+        Return a point that results form casting a ray between the given points to check for collisions
+
+        parameters:     tuple tuple representing the starting-point
+                        tuple tuple representing the destination-point
+                        pygame.Rect Bounderies of the Check
+                        int number of steps to check between the points
+        return values:  tuple tuple representing the point of first collision
+        """
         directionX = (pos[0] - dest[0]) / float(steps)
         directionY = (pos[1] - dest[1]) / float(steps)
         x, y = pos

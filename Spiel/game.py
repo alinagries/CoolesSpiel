@@ -3,28 +3,17 @@
 #Autor/en:  Kerim, Till, Lucas V.
 #Version:   1.0
 from random import randint
-
 from player import Player
 from bot import Bot
 from bullet import Bullet
 from weapon import Weapon
 from client import Client
+import createRoommap
 import gamemap
 import pygame
 import math
 import threading
 
-##WHITE = (255, 255, 255)
-##
-##'''erstelle das Fenster'''
-mapPath = "map.png"
-mymap = gamemap.createByImage(mapPath)
-##
-##screenWidth = mymap.getWidth()
-##screenHeight = mymap.getHeight()
-##screen = pygame.display.set_mode([screenWidth, screenHeight])
-##pygame.key.set_repeat(1,10)
-##background = pygame.image.load(mapPath).convert()
 
 class Game(threading.Thread):    
     def __init__(self, parent):
@@ -41,12 +30,11 @@ class Game(threading.Thread):
         self.parent = parent
 
         self.done = False
-        self.allPlayers = pygame.sprite.Group()
-        self.allBots    = pygame.sprite.Group()
-        self.allBullets = pygame.sprite.Group()
         self.allWeapons = pygame.sprite.Group()
-
         self.playerList = []
+        self.allPlayers = [] #tuple mit IPs und rauemen
+        roommap = createRoommap.createRoommap(self)
+        self.rooms = roommap.getRooms()
         
         self.clock = pygame.time.Clock()
         
@@ -56,6 +44,8 @@ class Game(threading.Thread):
         for botnick in self.playerList:
             self.createBot(botnick)
         self.start()
+
+    
         
     def run(self):
         '''
@@ -68,25 +58,51 @@ class Game(threading.Thread):
         '''
         
         while not self.done:
-            self.allBullets.update()
-            for bullet in self.allBullets:
-                self.__handleCollision(bullet)
+            for room in self.rooms:
+                room.update()
+
              # --- Limit to 20 frames per second
             self.clock.tick(60)
 
         pygame.quit()
-
-    def createBot(self, name, coord = [30,30]):
+    def showDoors(self, doorPositions):
+        '''
+        wird von room aufgerufen, ein bot hat eine Tur betreten und geht in einen anderen Raum
+        Parameter:      RoomName, (Int, 0-9,)
+                        newPosition (Tuple aus 2 INTs)
+                        bot, ein botobjekt
+        return values:  -
+        '''
+        self.parent.showDoors(doorPositions)
+        
+    
+    def changeRoom(self, roomName, newPosition, bot):
+        '''
+        wird von room aufgerufen, ein bot hat eine Tur betreten und geht in einen anderen Raum
+        Parameter:      RoomName, (Int, 0-9,)
+                        newPosition (Tuple aus 2 INTs)
+                        bot, ein botobjekt
+        return values:  -
+        '''
+        #print 'playerPos:', bot.rect.center
+        bot.rect.centerx = newPosition[0]
+        bot.rect.centery = newPosition[1]
+        bot.setRoom(roomName)
+        position = str(newPosition[0]) + "_" + str(newPosition[1])
+        for i in range(len(self.allPlayers)):
+            if bot.nick == self.allPlayers[i][0]:
+                self.allPlayers[i] = (bot.nick, int(roomName))
+        self.rooms[int(roomName)].addBot(bot)
+        self.parent.changeRoom(bot.nick, roomName, position)
+        
+    def createBot(self, name, room = 0, coord = [30,30]):
         '''
         bekommt eine Position eines Spielers und zeichnet diesen
         Parameter:      coord, bsp ("034", "100")
         return values:  -
         '''
-        bot = Bot()
-        bot.nick = name
-        bot.rect.centerx = coord[0]
-        bot.rect.centery = coord[1]
-        self.allBots.add(bot)
+        self.allPlayers.append((name, room))
+        self.rooms[room].createBot(name)
 
     def moveBot(self, newCoord, name):
         unterstrich = False
@@ -125,13 +141,11 @@ class Game(threading.Thread):
             else:
                 yCoord += destination[i]
         destination = int(xCoord), int(yCoord)
-        for bot in self.allBots:
-            if bot.nick == ip:
-                bullet = bot.shot(destination)
-                if bullet == None:
-                    print 'bullet ist in game.py == None'
-                self.allBullets.add(bullet)
-                print("Recieved a shot")
+
+        
+        for ipAndRoom in self.allPlayers:
+            if ip == ipAndRoom[0]:#[(IP, "0"), (IP, "1"),..]
+                self.rooms[ipAndRoom[1]].shoot(destination, ip)#nach der IP wird zwar doppelt geguckt, ist uns aber erstmal egal
 
 
     def updatePlayers(self, playerCoordinates):# muss nochz fuer schuesse und waffen gemacht werden
@@ -140,63 +154,68 @@ class Game(threading.Thread):
         Parameter:      playerCoordinates, liste mit Koordinaten der Spieler als Strings bsp.: ["100_80", "27_90",...]
         return values:  -
         '''
-
         for playerCoord in playerCoordinates:
-            self.moveBot(playerCoord, self.playerList[playerCoordinates.index(playerCoord)])
+            for botName in self.allPlayers:
+                try:
+                    if self.playerList[playerCoordinates.index(playerCoord)] == botName[0]:
+                        self.rooms[botName[1]].updatePlayer(playerCoord, botName[0])
+                except:
+                    print playerCoord, 'ist nicht in', playerCoordinates
+
+    def setRandomWeapons(self, positions):
+        newPositions = self.convertStringsToPositions(positions)
+        for weaponPosition in newPositions:
+            weapon = self.setRandomWeapon(weaponPosition)
+        
+    def setRandomWeapon(self, position):
+        intFirerate     = randint(1, 10)
+        floatFirerate   = 0.1 * intFirerate
+        bulletspeed     = randint(1, 3)
+        damage          = randint(1, 5)
+        ammo            = randint(4, 8)
+        room            = 0
+        newWeapon = Weapon(floatFirerate, bulletspeed, damage, ammo, room)
+        newWeapon.rect.center = position
+        self.rooms[room].addWeapon(newWeapon)
+        self.parent.sendStartWeapon(position, (floatFirerate, bulletspeed, damage, ammo))
+
+    def convertStringsToPositions(self, listWithStrings):
+        '''
+        bekommt eine Liste mit den Positionen der Spieler als String und wandelt diese um
+        bsp.: ["012_007", "130_097",...] ->  [(12,7), (130, 97),...]
+        Parameter:      ListWithStrings
+        return values:  listWithPositions, umgewandelte liste aus Positionen
+        '''
+        listWithPositions = []
+        for playerCoord in range(len(listWithStrings)):
+            for coord in listWithStrings[playerCoord]:
+                xCoord = ""
+                yCoord = ""
+                unterstrich = False
+                for i in range(len(listWithStrings[playerCoord])):
+                    try:
+                        int(listWithStrings[playerCoord][i])
+                        if unterstrich:
+                            yCoord += listWithStrings[playerCoord][i]
+                        else:
+                            xCoord += listWithStrings[playerCoord][i]
+                        if listWithStrings[playerCoord][i] == "_":
+                            unterstrich = True
+                    except:
+                        if listWithStrings[playerCoord][i] == "_":
+                            unterstrich = True
+            listWithPositions.append((int(xCoord), int(yCoord)))
+        return listWithPositions
+
+                    
+    def equipedWeapon(self, weaponPos, nickname, room):
+        self.parent.updateWeapon(weaponPos, nickname, room)
+
+    def changeWeapon(self, oldPosition, newPosition, room):
+        self.rooms[int(room)].changeWeapon(oldPosition, newPosition)
+
+    def playerDied(self, playerNick):
+        self.parent.playerDied(playerNick)
+                                
+        
                 
-
-    def __handleCollision(self, bullet):
-        '''
-        Private Funktion - nicht ausserhalb der Klasse benutzen!
-        ueberprueft ob ein Bulletobjekt in einem Mapobjekt oder einem Spieler, zieht einem Spieler Hitpoints ab
-        und entfernt die Bullet bei einer Kollision
-        Parameter:      Bulletobjekt
-        return values:  -
-        '''
-        removeBullets = []
-        removePlayers = []
-        bulletPos = bullet.bulletFligthPositions
-        hitPlayer = False
-
-    
-        for bulletposition in bulletPos:
-            if hitPlayer:
-                pass
-            elif not mymap.isPositionValid(bulletposition[0], bulletposition[1]):
-                removeBullets.append(bullet)
-            elif bulletposition[0] > mymap.getWidth() or bulletposition[1] > mymap.getHeight():
-                removeBullets.append(bullet)
-            elif bulletposition[0] < 0 or bulletposition[1] < 0:
-                removeBullets.append(bullet)
-            else:
-                for player in self.allBots:
-                    if player.rect.collidepoint(bulletposition) and player.nick != bullet.playernick:
-                        hitPlayer = True
-                        removeBullets.append(bullet)
-                        player.isHit(bullet.damage)
-                        if player.hp <= 0:
-                            removePlayers.append(player)
-                            self.parent.playerDied(player.nick)
-            
-        for bullet in removeBullets:
-            self.removeBullet(bullet)
-        for player in removePlayers:
-            self.removeBot(player)
-
-    def removeBullet(self, bullet):
-        '''
-        entfernt ein Bulletobjekt aus der Bulletgruppe
-        Parameter:      Bulletobjekt
-        return values:  -
-        '''
-        #print 'bullets:', self.allBullets.sprites()
-        self.allBullets.remove(bullet)
-
-    def removeBot(self, player):
-        '''
-        nimmt einen Spieler aus der Playergruppe heraus
-        Parameter:      Spielerobjekt
-        return values:  -
-        '''
-        print 'player:', player.nick, 'wird aus dem Spiel entfernt'
-        self.allBots.remove(player)

@@ -11,7 +11,7 @@ import time
 BLUE = (0, 0, 255)
 
 class Weapon(pygame.sprite.Sprite):
-    def __init__(self, firerate = 0.2, bulletspeed = 1, damage = 2, ammo = Decimal("Infinity")):
+    def __init__(self, firerate = 0.2, bulletspeed = 1, damage = 2, ammo = Decimal("Infinity"), room = 0):
         '''
         Initialisation von Weapon
         Parameter:      Float firerate, schuss nach seckunde * Firerate erlaubt
@@ -27,8 +27,9 @@ class Weapon(pygame.sprite.Sprite):
         
         self.firerate = firerate
         self.bulletspeed = bulletspeed
-        self.dmg = damage
+        self.damage = damage
         self.ammo = ammo
+        self.room = room
         self.lastShotTime = -self.firerate
         
 
@@ -44,7 +45,7 @@ class Weapon(pygame.sprite.Sprite):
         '''
         if self.shotAllowed():
             self.ammo -= 1
-            bullet = Bullet(position[0], position[1], eventPos, self.bulletspeed, self.dmg, playernick)
+            bullet = Bullet(position[0], position[1], eventPos, self.bulletspeed, self.damage, playernick)
             return bullet
         else:
             print 'shot not Allowed in createBullet unter weapon.py (firerate)'
@@ -74,7 +75,7 @@ class Weapon(pygame.sprite.Sprite):
             list = vSplit(eventPos, angle, amount)
             a=0
             for k in list:
-                bullet += Bullet(position[0], position[1], (list[a],list[a+1]), self.bulletspeed, self.dmg, playernick)
+                bullet += Bullet(position[0], position[1], (list[a],list[a+1]), self.bulletspeed, self.damage, playernick)
                 a+=2
             return bullet
         else:
@@ -178,15 +179,15 @@ class Weapon(pygame.sprite.Sprite):
         Parameter:      -
         return values:  Float, Schaden der Waffe
         '''
-        return self.dmg
+        return self.damage
     
-    def setDamage(self, dmg):
+    def setDamage(self, damage):
         '''
         setzt den Schaden der Waffe
         Parameter:      Float, Schaden der Waffe
         return values:  -
         '''
-        self.dmg = dmg
+        self.damage = damage
     
     def getAmmo(self):
         '''
